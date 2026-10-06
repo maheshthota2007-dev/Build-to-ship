@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CyberQuest AI defensive training API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Registration and session operations
+  - name: users
+    description: Current-user profile
+  - name: missions
+    description: Simulated defensive training missions
+  - name: progress
+    description: Learning progress and rankings
+  - name: ai
+    description: Backend-only defensive AI
 paths:
   /healthz:
     get:
@@ -24,13 +34,666 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Start a session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: End the current session
+      responses:
+        "200":
+          description: Session ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Read the signed-in user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /users/me:
+    get:
+      operationId: getMyProfile
+      tags: [users]
+      summary: Read the signed-in user's profile
+      responses:
+        "200":
+          description: Current profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update the signed-in user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /missions:
+    get:
+      operationId: listMissions
+      tags: [missions]
+      summary: Search and filter simulated missions
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: difficulty
+          schema: { $ref: "#/components/schemas/Difficulty" }
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [recommended, title, reward]
+      responses:
+        "200":
+          description: Matching missions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionListResponse"
+  /missions/{id}:
+    get:
+      operationId: getMission
+      tags: [missions]
+      summary: Read a simulated mission
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Mission details without the answer key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /missions/{id}/attempt:
+    post:
+      operationId: submitMissionAttempt
+      tags: [missions]
+      summary: Submit an investigation and receive saved feedback
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttemptInput"
+      responses:
+        "201":
+          description: Investigation analyzed and saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttemptResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /admin/missions:
+    get:
+      operationId: listAdminMissions
+      tags: [missions]
+      summary: List missions for administration
+      responses:
+        "200":
+          description: Missions including their answer keys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMissionListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createMission
+      tags: [missions]
+      summary: Create a training mission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissionInput"
+      responses:
+        "201":
+          description: Created mission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMissionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /admin/missions/{id}:
+    put:
+      operationId: updateMission
+      tags: [missions]
+      summary: Update a training mission
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissionInput"
+      responses:
+        "200":
+          description: Updated mission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMissionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: archiveMission
+      tags: [missions]
+      summary: Archive a training mission
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Mission archived
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /progress:
+    get:
+      operationId: getProgress
+      tags: [progress]
+      summary: Read progress and personalized learning signals
+      responses:
+        "200":
+          description: Current user's progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [progress]
+      summary: Read a global, weekly, or monthly leaderboard
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [global, weekly, monthly]
+            default: global
+      responses:
+        "200":
+          description: Ranked defenders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+  /ai/mentor:
+    post:
+      operationId: askCyberMentor
+      tags: [ai]
+      summary: Ask the defensive cybersecurity learning mentor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorInput"
+      responses:
+        "200":
+          description: Educational answer or safe redirection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 components:
+  parameters:
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: integer, minimum: 1 }
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Forbidden:
+      description: Administrator access required
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+      required: [status]
+    ApiError:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+      required: [code, message]
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: false }
+        error: { $ref: "#/components/schemas/ApiError" }
+      required: [success, error]
+    SuccessResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { type: object }
+      required: [success, data]
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { type: string, enum: [user, admin] }
+        xp: { type: integer }
+        level: { type: integer }
+        streak: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, email, role, xp, level, streak, createdAt]
+    UserData:
+      type: object
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+      required: [user]
+    UserResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/UserData" }
+      required: [success, data]
+    AuthResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/UserData" }
+      required: [success, data]
+    RegisterInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 10, maxLength: 100 }
+      required: [name, email, password]
+    LoginInput:
+      type: object
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 1, maxLength: 100 }
+      required: [email, password]
+    ProfileUpdateInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+      required: [name]
+    Difficulty:
+      type: string
+      enum: [Easy, Medium, Hard, Expert]
+    Assessment:
+      type: string
+      enum: [SAFE, SUSPICIOUS, PHISHING]
+    EmailScenario:
+      type: object
+      properties:
+        senderName: { type: string }
+        senderEmail: { type: string }
+        recipientName: { type: string }
+        subject: { type: string }
+        receivedAt: { type: string }
+        body: { type: string }
+        displayedUrl: { type: ["string", "null"] }
+        attachment: { type: ["string", "null"] }
+      required: [senderName, senderEmail, recipientName, subject, receivedAt, body, displayedUrl, attachment]
+    Mission:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        estimatedMinutes: { type: integer }
+        xpReward: { type: integer }
+        scenario: { $ref: "#/components/schemas/EmailScenario" }
+        completed: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, title, description, category, difficulty, estimatedMinutes, xpReward, scenario, completed, createdAt]
+    MissionAdmin:
+      allOf:
+        - $ref: "#/components/schemas/Mission"
+        - type: object
+          properties:
+            answerAssessment: { $ref: "#/components/schemas/Assessment" }
+            correctFindings:
+              type: array
+              items: { type: string }
+          required: [answerAssessment, correctFindings]
+    MissionInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 3, maxLength: 120 }
+        description: { type: string, minLength: 10, maxLength: 500 }
+        category: { type: string, minLength: 2, maxLength: 60 }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        estimatedMinutes: { type: integer, minimum: 1, maximum: 180 }
+        xpReward: { type: integer, minimum: 10, maximum: 500 }
+        scenario: { $ref: "#/components/schemas/EmailScenario" }
+        answerAssessment: { $ref: "#/components/schemas/Assessment" }
+        correctFindings:
+          type: array
+          minItems: 1
+          items: { type: string, minLength: 2, maxLength: 60 }
+      required: [title, description, category, difficulty, estimatedMinutes, xpReward, scenario, answerAssessment, correctFindings]
+    MissionListData:
+      type: object
+      properties:
+        missions:
+          type: array
+          items: { $ref: "#/components/schemas/Mission" }
+      required: [missions]
+    MissionListResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/MissionListData" }
+      required: [success, data]
+    MissionData:
+      type: object
+      properties:
+        mission: { $ref: "#/components/schemas/Mission" }
+      required: [mission]
+    MissionResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/MissionData" }
+      required: [success, data]
+    AdminMissionListData:
+      type: object
+      properties:
+        missions:
+          type: array
+          items: { $ref: "#/components/schemas/MissionAdmin" }
+      required: [missions]
+    AdminMissionListResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/AdminMissionListData" }
+      required: [success, data]
+    AdminMissionData:
+      type: object
+      properties:
+        mission: { $ref: "#/components/schemas/MissionAdmin" }
+      required: [mission]
+    AdminMissionResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/AdminMissionData" }
+      required: [success, data]
+    AttemptInput:
+      type: object
+      properties:
+        assessment: { $ref: "#/components/schemas/Assessment" }
+        findings:
+          type: array
+          maxItems: 8
+          items: { type: string, minLength: 2, maxLength: 60 }
+      required: [assessment, findings]
+    AIAnalysis:
+      type: object
+      properties:
+        riskLevel: { type: string, enum: [LOW, MEDIUM, HIGH] }
+        score: { type: integer, minimum: 0, maximum: 100 }
+        correctFindings:
+          type: array
+          items: { type: string }
+        missedFindings:
+          type: array
+          items: { type: string }
+        explanation: { type: string }
+        recommendations:
+          type: array
+          items: { type: string }
+        nextRecommendedTopic: { type: string }
+        encouragement: { type: string }
+      required: [riskLevel, score, correctFindings, missedFindings, explanation, recommendations, nextRecommendedTopic, encouragement]
+    Attempt:
+      type: object
+      properties:
+        id: { type: integer }
+        missionId: { type: integer }
+        assessment: { $ref: "#/components/schemas/Assessment" }
+        findings:
+          type: array
+          items: { type: string }
+        score: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, missionId, assessment, findings, score, createdAt]
+    AttemptData:
+      type: object
+      properties:
+        attempt: { $ref: "#/components/schemas/Attempt" }
+        feedback: { $ref: "#/components/schemas/AIAnalysis" }
+        xpAwarded: { type: integer }
+        completed: { type: boolean }
+        nextRecommendedTopic: { type: string }
+      required: [attempt, feedback, xpAwarded, completed, nextRecommendedTopic]
+    AttemptResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/AttemptData" }
+      required: [success, data]
+    CategoryScore:
+      type: object
+      properties:
+        category: { type: string }
+        score: { type: integer, minimum: 0, maximum: 100 }
+        attempts: { type: integer }
+      required: [category, score, attempts]
+    RecentActivity:
+      type: object
+      properties:
+        missionTitle: { type: string }
+        category: { type: string }
+        score: { type: integer }
+        xpAwarded: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [missionTitle, category, score, xpAwarded, createdAt]
+    Progress:
+      type: object
+      properties:
+        xp: { type: integer }
+        level: { type: integer }
+        currentLevelXp: { type: integer }
+        nextLevelXp: { type: integer }
+        missionsCompleted: { type: integer }
+        accuracy: { type: integer }
+        streak: { type: integer }
+        globalRank: { type: integer }
+        categoryScores:
+          type: array
+          items: { $ref: "#/components/schemas/CategoryScore" }
+        recentActivity:
+          type: array
+          items: { $ref: "#/components/schemas/RecentActivity" }
+        recommendation: { type: ["string", "null"] }
+      required: [xp, level, currentLevelXp, nextLevelXp, missionsCompleted, accuracy, streak, globalRank, categoryScores, recentActivity, recommendation]
+    ProgressResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/Progress" }
+      required: [success, data]
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank: { type: integer }
+        userId: { type: integer }
+        name: { type: string }
+        level: { type: integer }
+        xp: { type: integer }
+        missions: { type: integer }
+      required: [rank, userId, name, level, xp, missions]
+    LeaderboardData:
+      type: object
+      properties:
+        period: { type: string }
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/LeaderboardEntry" }
+        currentUserId: { type: ["integer", "null"] }
+      required: [period, entries, currentUserId]
+    LeaderboardResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/LeaderboardData" }
+      required: [success, data]
+    MentorInput:
+      type: object
+      properties:
+        question: { type: string, minLength: 3, maxLength: 1000 }
+      required: [question]
+    MentorData:
+      type: object
+      properties:
+        answer: { type: string }
+        safetyRedirect: { type: boolean }
+        topic: { type: string }
+      required: [answer, safetyRedirect, topic]
+    MentorResponse:
+      type: object
+      properties:
+        success: { type: boolean, const: true }
+        data: { $ref: "#/components/schemas/MentorData" }
+      required: [success, data]

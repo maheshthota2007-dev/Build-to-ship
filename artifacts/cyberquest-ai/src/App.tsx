@@ -1,62 +1,195 @@
-import { type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { Link, Route, Switch, useLocation, useParams } from 'wouter';
+import {
+  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Award, BookOpen,
+  Check, CheckCircle2, ChevronDown, ChevronRight, Clock3, Crosshair,
+  ExternalLink, Eye, FileWarning, Flag, LockKeyhole, LogOut, Mail,
+  Menu, MessageSquareText, Plus, Radar, Shield, ShieldCheck, Sparkles,
+  Target, TrendingUp, Trophy, X,
+} from 'lucide-react';
+import {
+  Assessment, Difficulty, GetLeaderboardPeriod, useArchiveMission,
+  useAskCyberMentor, useCreateMission, useGetCurrentUser, useGetLeaderboard,
+  useGetMission, useGetMyProfile, useGetProgress, useListAdminMissions,
+  useListMissions, useLogin, useLogout, useRegister, useSubmitMissionAttempt,
+  useUpdateMission, useUpdateMyProfile, getGetCurrentUserQueryKey,
+  getGetMyProfileQueryKey, getGetProgressQueryKey, getGetMissionQueryKey,
+  getGetLeaderboardQueryKey, getListAdminMissionsQueryKey, getListMissionsQueryKey,
+} from '@workspace/api-client-react';
+import type { Mission, MissionInput } from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import {
-  Route,
-  Switch,
-  useLocation,
-  Router as WouterRouter,
-} from 'wouter';
 
-const queryClient = new QueryClient();
-
+const qc = new QueryClient();
+const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(' ');
+const box = 'panel';
+const SESSION_HINT = 'cyberquest-session';
+function hasSessionHint() {
+  return typeof window !== 'undefined' && window.localStorage.getItem(SESSION_HINT) === '1';
+}
+const prettyError = (e: unknown) => {
+  if (e && typeof e === 'object' && 'error' in e) return String((e as {error:{message?:string}}).error?.message || 'Request could not be completed.');
+  return e instanceof Error ? e.message : 'Something went wrong. Please try again.';
+};
+function Notice({ children, tone = 'error' }: { children: ReactNode; tone?: 'error'|'success'|'info' }) {
+  return <div className={`notice notice-${tone}`} role="status">{children}</div>;
+}
+function Loading({ label='Loading secure workspace' }: {label?:string}) {
+  return <div className="loading-state"><div className="skeleton-line w-32"/><div className="skeleton-line w-64"/><span className="mono">{label}</span></div>;
+}
+function PageHeading({ eyebrow, title, subtitle, right }: {eyebrow:string; title:string; subtitle?:string; right?:ReactNode}) {
+  return <div className="page-heading"><div><div className="eyebrow">{eyebrow}</div><h1 className="display">{title}</h1>{subtitle&&<p>{subtitle}</p>}</div>{right&&<div>{right}</div>}</div>;
+}
+function Button({ children, onClick, variant='primary', disabled, type='button', className='', ...props }: {children:ReactNode;onClick?:()=>void;variant?:'primary'|'quiet'|'outline'|'danger';disabled?:boolean;type?:'button'|'submit';className?:string;[key:string]:any}) {
+  return <button type={type} onClick={onClick} disabled={disabled} className={`btn btn-${variant} ${className}`} {...props}>{children}</button>;
+}
+function Field({label, ...props}: {label:string;[key:string]:any}) {
+  return <label className="field"><span>{label}</span><input {...props}/></label>;
+}
+function Shell({children}: {children:ReactNode}) {
+  const [mobile,setMobile]=useState(false);
+  const [loc,setLoc]=useLocation();
+  const auth=useGetCurrentUser({query:{queryKey:getGetCurrentUserQueryKey(),enabled:hasSessionHint()}});
+  const logout=useLogout();
+  const user=auth.data?.data?.user;
+  const links=[['/','Discover'],['/dashboard','Command center'],['/leaderboard','Leaderboard'],['/mentor','Cyber mentor']];
+  return <div className="app-frame">
+    <header className="topbar">
+      <Link href="/" className="brand"><span className="brand-mark"><Shield size={19}/><i/></span><span>CYBER<span className="brand-accent">QUEST</span><small>DEFENSIVE LEARNING SYSTEM</small></span></Link>
+      <button className="mobile-toggle" aria-label="Toggle navigation" onClick={()=>setMobile(!mobile)}><Menu size={20}/></button>
+      <nav className={cx('topnav',mobile&&'nav-open')} aria-label="Main navigation">
+        {links.map(([href,label])=><Link key={href} href={href} onClick={()=>setMobile(false)} className={cx('navlink',loc===href&&'nav-active')}>{label}</Link>)}
+      </nav>
+      <div className="top-actions">{user?<><Link href="/profile" className="user-pill"><span className="avatar">{user.name.slice(0,1).toUpperCase()}</span><span>{user.name}<small>LVL {user.level} · {user.xp.toLocaleString()} XP</small></span></Link><button className="icon-btn" title="Sign out" onClick={()=>logout.mutate(undefined,{onSuccess:()=>{window.localStorage.removeItem(SESSION_HINT);qc.setQueryData(getGetCurrentUserQueryKey(),undefined);setLoc('/');}})} disabled={logout.isPending}><LogOut size={17}/></button></>:<><Link href="/login" className="navlink">Sign in</Link><Link href="/register" className="btn btn-primary compact">Join the network <ArrowRight size={15}/></Link></>}</div>
+    </header>
+    {user?.role==='admin'&&<div className="admin-strip"><span className="status-dot"/> ADMIN ACCESS ENABLED <Link href="/admin">MISSION CONTROL <ArrowRight size={13}/></Link></div>}
+    <main className="main-area">{children}</main>
+    <footer className="footer"><span className="mono">CYBERQUEST / DEFENSE FIRST</span><span>Practice safely. Protect confidently.</span><span className="online"><i/> SYSTEM OPERATIONAL</span></footer>
+  </div>;
+}
+function NeedAuth({children,admin=false}:{children:ReactNode;admin?:boolean}) {
+  const [loc,setLoc]=useLocation();
+  const q=useGetCurrentUser({query:{queryKey:getGetCurrentUserQueryKey(),enabled:hasSessionHint()}});
+  useEffect(()=>{if(!q.isLoading&&!q.data?.data?.user){if(q.isError)window.localStorage.removeItem(SESSION_HINT);setLoc('/login');}},[q.isLoading,q.data,q.isError,setLoc]);
+  if(q.isLoading)return <Shell><Loading/></Shell>;
+  const user=q.data?.data?.user;
+  if(!user)return null;
+  if(admin&&user.role!=='admin')return <Shell><div className="content-wrap"><Notice>Administrator access is required to view this workspace.</Notice><Link href="/dashboard" className="text-link">Return to command center <ArrowRight size={14}/></Link></div></Shell>;
+  return <>{children}</>;
+}
 function Home() {
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Replit Agent is building...
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Your app will appear here once it's ready.
-        </p>
+  const missions=useListMissions();
+  const user=useGetCurrentUser({query:{queryKey:getGetCurrentUserQueryKey(),enabled:hasSessionHint()}}).data?.data?.user;
+  const list=missions.data?.data?.missions||[];
+  return <Shell><div className="home-wrap">
+    <section className="hero">
+      <div className="hero-copy fade-in"><div className="live-label"><span className="status-dot"/> DEFENSIVE READINESS // TRAINING NODE 07</div>
+        <h1 className="display">Learn. Investigate.<br/><span>Defend.</span><br/>Practice safely.</h1>
+        <p>Realistic threat simulations. AI-guided debriefs. Skills that hold up when it matters. Your next incident starts here—safely.</p>
+        <div className="hero-buttons"><Link href={user?'/dashboard':'/register'} className="btn btn-primary">Enter the training floor <ArrowRight size={17}/></Link><a href="#missions" className="btn btn-outline">Explore simulations <ChevronDown size={16}/></a></div>
+        <div className="hero-proof"><div className="proof-mark"><ShieldCheck size={17}/></div><span>SAFE SIMULATIONS ONLY</span><i/><span>BUILT FOR DEFENDERS</span></div>
       </div>
-    </div>
-  );
+      <div className="hero-visual" aria-label="Abstract cybersecurity radar display"><div className="radar-grid"/><div className="radar-ring ring-a"/><div className="radar-ring ring-b"/><div className="radar-ring ring-c"/><div className="radar-sweep"/><span className="radar-core"><Shield size={28}/></span><span className="radar-pip pip1"/><span className="radar-pip pip2"/><span className="radar-pip pip3"/><div className="radar-readout"><span className="mono">THREAT SURFACE</span><b>SIMULATION ACTIVE</b><small>NO LIVE TARGETS · ISOLATED ENVIRONMENT</small></div><div className="float-chip chip-top"><Crosshair size={15}/><span>DETECTION<br/><b>+ precision</b></span></div><div className="float-chip chip-bottom"><Activity size={15}/><span>READINESS INDEX<br/><b>Building in real time</b></span></div><div className="corner-corner"/></div>
+      <div className="hero-index mono">01 <span>/ 04</span></div>
+    </section>
+    <section className="signal-row"><div><span className="signal-number">01</span><span>SPOT THE SIGNAL</span></div><div><span className="signal-number">02</span><span>MARK YOUR EVIDENCE</span></div><div><span className="signal-number">03</span><span>LEARN FROM THE DEBRIEF</span></div><div className="signal-tail mono">REPEAT UNTIL INSTINCT</div></section>
+    <section id="missions" className="content-section">
+      <PageHeading eyebrow="MISSION CATALOG / LIVE SIMULATIONS" title="Choose your next investigation" subtitle="Every scenario is isolated, fictional, and designed to sharpen defensive judgment." right={<Link href="/leaderboard" className="text-link">View rankings <ArrowRight size={15}/></Link>}/>
+      {missions.isLoading?<div className="mission-grid">{[1,2,3].map(i=><div className={`${box} mission-card`} key={i}><div className="skeleton-line w-32"/><div className="skeleton-line w-64"/></div>)}</div>:missions.isError?<Notice>{prettyError(missions.error)}</Notice>:list.length===0?<div className="empty-state"><Radar size={28}/><b>No active simulations</b><span>New defensive exercises will appear here.</span></div>:<div className="mission-grid">{list.slice(0,6).map(m=><MissionCard key={m.id} mission={m} publicView/>)}</div>}
+    </section>
+    <section className="manifesto"><div className="manifesto-index mono">FIELD NOTE / 001</div><div><span className="eyebrow">SECURITY IS A HUMAN SKILL</span><h2 className="display">The strongest firewall<br/>is a trained mind.</h2></div><p>Build the calm, evidence-led instincts that help teams recognize risk before it becomes an incident. No real inboxes. No live links. Just focused practice.</p><Link href={user?'/dashboard':'/register'} className="text-link">Start your first mission <ArrowRight size={15}/></Link></section>
+  </div></Shell>;
 }
-
-function Router() {
-  return (
-    // Keep a shared shell (sidebar, navbar) outside the boundary so it
-    // survives a page crash.
-    <RoutedErrorBoundary>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route component={NotFound} />
-      </Switch>
-    </RoutedErrorBoundary>
-  );
+function MissionCard({mission:m,publicView=false}:{mission:Mission;publicView?:boolean}) {
+  return <article className={`${box} mission-card`} data-testid={`card-mission-${m.id}`}>
+    <div className="mission-card-top"><span className="tag">{m.category}</span><span className={`difficulty diff-${m.difficulty.toLowerCase()}`}>{m.difficulty}</span></div>
+    <h3 className="display">{m.title}</h3><p>{m.description}</p>
+    <div className="mission-meta"><span><Clock3 size={14}/>{m.estimatedMinutes} min</span><span><Award size={14}/>{m.xpReward} XP</span></div>
+    <div className="mission-card-bottom"><span className={m.completed?'done-state':'ready-state'}>{m.completed?<><CheckCircle2 size={14}/> COMPLETED</>:<><span className="status-dot"/> READY FOR REVIEW</>}</span><Link href={`/missions/${m.id}`} className="arrow-button" aria-label={`Open ${m.title}`} data-testid={`link-mission-${m.id}`}><ArrowRight size={17}/></Link></div>
+  </article>;
 }
-
-function RoutedErrorBoundary({ children }: { children: ReactNode }) {
-  const [location] = useLocation();
-  return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>;
+function AuthPage({register}:{register:boolean}) {
+  const [loc,setLoc]=useLocation();
+  const [name,setName]=useState('');const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[error,setError]=useState('');
+  const login=useLogin();const signup=useRegister();const mutation=register?signup:login;
+  const submit=(e:FormEvent)=>{e.preventDefault();setError('');mutation.mutate({data:register?{name,email,password}:{email,password}} as any,{onSuccess:(res:any)=>{window.localStorage.setItem(SESSION_HINT,'1');qc.setQueryData(getGetCurrentUserQueryKey(),res);setLoc('/dashboard');},onError:(err:any)=>setError(prettyError(err))});};
+  return <Shell><div className="auth-layout"><div className="auth-visual"><div className="auth-orbit"><Shield size={44}/><span className="orbit-dot"/></div><span className="eyebrow">CYBERQUEST / ACCESS NODE</span><h2 className="display">{register?'Your defense journey starts here.':'Good to have you back.'}</h2><p>{register?'Build practical security instincts in a safe, focused environment.':'Resume your learning path and keep building your defensive edge.'}</p><div className="auth-quote mono">“Observe. Verify. Respond.”</div></div><section className="auth-card"><div className="eyebrow">{register?'NEW OPERATIVE':'SECURE SIGN-IN'}</div><h1 className="display">{register?'Create your account':'Access your workspace'}</h1><p>{register?'A name, an email, and a commitment to better defense.':'Your missions and progress are waiting.'}</p>{error&&<Notice>{error}</Notice>}<form onSubmit={submit} className="form-stack">{register&&<Field label="Display name" value={name} onChange={(e:any)=>setName(e.target.value)} minLength={2} required autoComplete="name" data-testid="input-name"/>}<Field label="Email address" type="email" value={email} onChange={(e:any)=>setEmail(e.target.value)} required autoComplete="email" data-testid="input-email"/><Field label="Password" type="password" value={password} onChange={(e:any)=>setPassword(e.target.value)} minLength={register?10:1} required autoComplete={register?'new-password':'current-password'} data-testid="input-password"/><Button type="submit" disabled={mutation.isPending} className="full-btn">{mutation.isPending?'Establishing secure session…':register?'Create secure account':'Sign in'} <ArrowRight size={16}/></Button></form><div className="auth-foot">{register?'Already have access?':'New to CyberQuest?'} <Link href={register?'/login':'/register'} className="text-link">{register?'Sign in':'Create an account'}</Link></div><div className="safe-note"><LockKeyhole size={14}/> Cookie-based secure session · defensive learning only</div></section></div></Shell>;
 }
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+function Dashboard() {
+  const progress=useGetProgress();const missions=useListMissions();const p=progress.data?.data;const list=missions.data?.data?.missions||[];
+  if(progress.isLoading)return <Shell><Loading label="Loading your progress"/></Shell>;
+  if(progress.isError)return <Shell><div className="content-wrap"><Notice>{prettyError(progress.error)}</Notice><Button variant="outline" onClick={()=>progress.refetch()}>Retry</Button></div></Shell>;
+  if(!p)return <Shell><Loading/></Shell>;
+  const percent=p.nextLevelXp?Math.min(100,Math.round(p.currentLevelXp/p.nextLevelXp*100)):0;
+  return <Shell><div className="content-wrap fade-in"><PageHeading eyebrow="PERSONAL COMMAND CENTER" title="Good to see you back." subtitle="Your readiness is built one careful decision at a time." right={<Link href="/#missions" className="btn btn-primary">Find a mission <ArrowRight size={16}/></Link>}/>
+    {p.recommendation&&<div className="recommend-banner"><div className="recommend-icon"><Target size={19}/></div><div><span className="eyebrow">NEXT RECOMMENDED MOVE</span><b>{p.recommendation}</b></div><Link href={list[0]?`/missions/${list[0].id}`:'/'} className="text-link">Explore <ArrowRight size={15}/></Link></div>}
+    <div className="stats-grid"><StatCard label="Experience" value={p.xp.toLocaleString()} unit="XP TOTAL" icon={<Sparkles size={17}/>}/><StatCard label="Missions complete" value={p.missionsCompleted.toString().padStart(2,'0')} unit="INVESTIGATIONS" icon={<ShieldCheck size={17}/>} /><StatCard label="Decision accuracy" value={`${Math.round(p.accuracy)}%`} unit="AVERAGE SCORE" icon={<Crosshair size={17}/>} /><StatCard label="Current streak" value={String(p.streak)} unit="DAYS ACTIVE" icon={<TrendingUp size={17}/>} /></div>
+    <div className="dashboard-columns"><section className={`${box} level-panel`}><div className="panel-heading"><span className="eyebrow">OPERATOR RANK</span><span className="mono muted">LEVEL {p.level}</span></div><div className="level-number display">{String(p.level).padStart(2,'0')}<span> / FIELD ANALYST</span></div><div className="progress-track"><i style={{width:`${percent}%`}}/></div><div className="level-legend"><span>{p.currentLevelXp} XP earned this level</span><span>{p.nextLevelXp} XP to next</span></div><div className="rank-foot"><Trophy size={16}/> Global standing <b>#{p.globalRank||'—'}</b><Link href="/leaderboard">Full rankings <ArrowRight size={14}/></Link></div></section>
+      <section className={`${box} category-panel`}><div className="panel-heading"><span className="eyebrow">SKILL PROFILE</span><span className="mono muted">BY CATEGORY</span></div>{p.categoryScores.length===0?<div className="inline-empty">Complete a mission to start mapping your strengths.</div>:p.categoryScores.map((cat,i)=><div className="category-row" key={cat.category}><div><span className="category-bullet">{String(i+1).padStart(2,'0')}</span><b>{cat.category}</b><span className="muted">{cat.attempts} attempts</span></div><div className="barline"><i style={{width:`${cat.score}%`}}/></div><strong>{Math.round(cat.score)}%</strong></div>)}</section></div>
+    <div className="activity-layout"><section className={`${box} activity-panel`}><div className="panel-heading"><span className="eyebrow">RECENT FIELD ACTIVITY</span><Link href="/" className="text-link">Mission catalog <ArrowRight size={14}/></Link></div>{p.recentActivity.length===0?<div className="empty-state compact-empty"><Activity size={24}/><b>No missions recorded yet</b><Link href="/" className="text-link">Browse safe simulations <ArrowRight size={14}/></Link></div>:p.recentActivity.map((a,i)=><div className="activity-row" key={`${a.missionTitle}-${i}`}><span className="activity-mark"><Check size={15}/></span><div><b>{a.missionTitle}</b><small>{a.category} · {new Date(a.createdAt).toLocaleDateString()}</small></div><span className="score-pill">{a.score}%</span><span className="xp-amount">+{a.xpAwarded} XP</span></div>)}</section><section className={`${box} quick-missions`}><div className="panel-heading"><span className="eyebrow">READY TO DEPLOY</span><span className="mono muted">{list.length} AVAILABLE</span></div>{missions.isLoading?<Loading label="Retrieving mission catalog"/>:missions.isError?<Notice>{prettyError(missions.error)}</Notice>:list.filter(m=>!m.completed).slice(0,3).map(m=><Link href={`/missions/${m.id}`} className="quick-link" key={m.id}><span><b>{m.title}</b><small>{m.category} · {m.difficulty}</small></span><span className="mono">+{m.xpReward}<ArrowRight size={14}/></span></Link>)}</section></div>
+  </div></Shell>;
 }
-
+function StatCard({label,value,unit,icon}:{label:string;value:string;unit:string;icon:ReactNode}) {return <div className={`${box} stat-card`}><div className="stat-top">{label}<span>{icon}</span></div><div className="stat-value display">{value}</div><div className="stat-unit mono">{unit}</div></div>}
+const FINDING_OPTIONS=['Sender identity mismatch','Urgent or threatening language','Unexpected credential request','Unusual or shortened link','Mismatched displayed URL','Unexpected attachment','Unusual payment or data request','Unexpected but legitimate communication'];
+function MissionPage() {
+  const {id:raw=''}=useParams<{id:string}>();const id=Number(raw);const q=useGetMission(id,{query:{enabled:Number.isFinite(id)&&id>0,queryKey:getGetMissionQueryKey(id)}});
+  const [assessment,setAssessment]=useState<keyof typeof Assessment|''>('');const[findings,setFindings]=useState<string[]>([]);const[feedback,setFeedback]=useState<any>(null);const[error,setError]=useState('');
+  const submit=useSubmitMissionAttempt();const m=q.data?.data?.mission;
+  const toggle=(x:string)=>setFindings(cur=>cur.includes(x)?cur.filter(y=>y!==x):cur.length<8?[...cur,x]:cur);
+  const send=(e:FormEvent)=>{e.preventDefault();if(!assessment){setError('Choose a classification before submitting.');return;}setError('');submit.mutate({id,data:{assessment,findings}},{onSuccess:(res)=>{setFeedback(res.data);qc.invalidateQueries({queryKey:getGetProgressQueryKey()});qc.invalidateQueries({queryKey:getListMissionsQueryKey()});qc.invalidateQueries({queryKey:getGetMissionQueryKey(id)});},onError:(e)=>setError(prettyError(e))});};
+  if(q.isLoading)return <Shell><Loading label="Opening isolated investigation"/></Shell>;
+  if(q.isError||!m)return <Shell><div className="content-wrap"><Notice>{q.isError?prettyError(q.error):'This mission could not be found.'}</Notice><Link href="/" className="text-link">Return to catalog <ArrowRight size={14}/></Link></div></Shell>;
+  return <Shell><div className="content-wrap investigation fade-in"><div className="breadcrumb"><Link href="/">MISSION CATALOG</Link><ChevronRight size={13}/><span>INVESTIGATION {String(m.id).padStart(3,'0')}</span></div><PageHeading eyebrow={`${m.category.toUpperCase()} / ${m.difficulty.toUpperCase()} EXERCISE`} title={m.title} subtitle={m.description} right={<div className="mission-reward"><Award size={17}/><b>{m.xpReward} XP</b><small>REWARD</small></div>}/>
+    {feedback?<AnalysisResult feedback={feedback} onAgain={()=>{setFeedback(null);setAssessment('');setFindings([]);}}/>:<div className="investigation-grid"><section className="mail-window"><div className="window-bar"><span className="window-lights"><i/><i/><i/></span><span className="mono">ISOLATED MAIL CLIENT / READ-ONLY SIMULATION</span><span className="sim-label"><ShieldCheck size={12}/> SAFE ENVIRONMENT</span></div><div className="mail-toolbar"><Mail size={16}/><span>INBOX / QUARANTINE REVIEW</span><span className="mono">CASE CQ-{String(m.id).padStart(4,'0')}</span></div><div className="email-head"><div className="email-icon">{m.scenario.senderName.slice(0,1).toUpperCase()}</div><div className="email-address"><b>{m.scenario.senderName}</b><span>{m.scenario.senderEmail}</span><small>TO: {m.scenario.recipientName}</small></div><time>{m.scenario.receivedAt}</time></div><h2 className="email-subject">{m.scenario.subject}</h2><article className="email-body">{m.scenario.body.split('\n').map((line,i)=><p key={i}>{line||'\u00a0'}</p>)}{m.scenario.displayedUrl&&<div className="email-url"><ExternalLink size={14}/><span>{m.scenario.displayedUrl}</span></div>}{m.scenario.attachment&&<div className="attachment"><FileWarning size={16}/><span>{m.scenario.attachment}</span><small>ATTACHMENT</small></div>}</article><div className="mail-footer"><LockKeyhole size={14}/> This email is a fictional training artifact. Links are not active.</div></section>
+      <form className={`${box} decision-panel`} onSubmit={send}><div className="panel-heading"><span className="eyebrow">YOUR INVESTIGATION</span><span className="mono muted">01 / CLASSIFY</span></div><p>What is your assessment of this message?</p><div className="assessment-options">{(['SAFE','SUSPICIOUS','PHISHING'] as const).map(option=><button type="button" key={option} onClick={()=>setAssessment(option)} className={cx('assessment-option',assessment===option&&`selected ${option.toLowerCase()}`)}><span className="assessment-indicator">{assessment===option&&<i/>}</span><span>{option}</span><small>{option==='SAFE'?'Legitimate communication':option==='SUSPICIOUS'?'Verify before interacting':'Malicious or deceptive'}</small></button>)}</div><div className="findings-head"><div><span className="eyebrow">02 / MARK EVIDENCE</span><small>Select every signal you observed</small></div><span className="mono">{findings.length} / 8</span></div><div className="finding-list">{FINDING_OPTIONS.map(item=><button type="button" key={item} onClick={()=>toggle(item)} className={cx('finding-option',findings.includes(item)&&'finding-selected')}><span>{findings.includes(item)?<Check size={13}/>:<Plus size={13}/>}</span>{item}</button>)}</div>{error&&<Notice>{error}</Notice>}<Button type="submit" disabled={submit.isPending} className="full-btn">{submit.isPending?'Scoring your investigation…':'Submit assessment'} <ArrowRight size={16}/></Button><div className="submission-note"><Shield size={13}/> Findings and assessment are saved to your learning record.</div></form></div>}
+  </div></Shell>;
+}
+function AnalysisResult({feedback,onAgain}:{feedback:any;onAgain:()=>void}) {
+  const f=feedback.feedback;return <div className="analysis-layout fade-in"><section className={`${box} analysis-score`}><div className="eyebrow">AI-GUIDED DEBRIEF / COMPLETE</div><div className="score-ring" style={{'--score':`${f.score}%`} as any}><div><b>{f.score}</b><small> / 100</small></div></div><span className={`risk risk-${f.riskLevel.toLowerCase()}`}>{f.riskLevel} RISK</span><h2 className="display">{f.encouragement}</h2><p>Mission recorded · {feedback.xpAwarded} XP awarded</p><div className="analysis-actions"><Button onClick={onAgain} variant="outline">Review findings</Button><Link href="/dashboard" className="btn btn-primary">View progress <ArrowRight size={15}/></Link></div></section><div className="analysis-details"><section className={`${box} feedback-block`}><span className="eyebrow">ASSESSMENT</span><p>{f.explanation}</p></section><section className={`${box} feedback-block`}><span className="eyebrow positive"><CheckCircle2 size={14}/> CORRECTLY IDENTIFIED</span>{f.correctFindings.length?f.correctFindings.map((x:string)=><div className="feedback-item" key={x}><Check size={14}/>{x}</div>):<p className="muted">No findings matched this time. Every review builds experience.</p>}</section><section className={`${box} feedback-block`}><span className="eyebrow caution"><Eye size={14}/> WORTH A SECOND LOOK</span>{f.missedFindings.length?f.missedFindings.map((x:string)=><div className="feedback-item" key={x}><ArrowDownRight size={14}/>{x}</div>):<p className="muted">You caught every key signal in this review.</p>}</section><section className={`${box} feedback-block`}><span className="eyebrow">RECOMMENDED PRACTICE</span>{f.recommendations.map((x:string)=><div className="feedback-item" key={x}><ArrowRight size={13}/>{x}</div>)}<div className="next-topic"><span className="mono">NEXT TOPIC</span><b>{f.nextRecommendedTopic}</b></div></section></div></div>;
+}
+function Leaderboard() {
+  const [period,setPeriod]=useState<keyof typeof GetLeaderboardPeriod>('weekly');const q=useGetLeaderboard({period},{query:{queryKey:getGetLeaderboardQueryKey({period})}});const data=q.data?.data;
+  return <Shell><div className="content-wrap fade-in"><PageHeading eyebrow="THE DEFENDER NETWORK" title="Leaderboard" subtitle="Progress is personal. Recognition is shared." right={<div className="period-switch">{(['weekly','monthly','global'] as const).map(x=><button key={x} onClick={()=>setPeriod(x)} className={period===x?'period-active':''}>{x}</button>)}</div>}/>
+    <section className={`${box} leaderboard-card`}><div className="leaderboard-head"><span>RANK / OPERATOR</span><span>LEVEL</span><span>MISSIONS</span><span>EXPERIENCE</span></div>{q.isLoading?<Loading label="Loading defender rankings"/>:q.isError?<div className="leader-empty"><Notice>{prettyError(q.error)}</Notice><Button variant="outline" onClick={()=>q.refetch()}>Retry</Button></div>:!data?.entries.length?<div className="empty-state"><Trophy size={26}/><b>Rankings are quiet for now</b><span>Complete a mission to make your mark.</span></div>:data.entries.map((entry,i)=><div className={cx('leader-row',data.currentUserId===entry.userId&&'current-leader')} key={entry.userId}><div className="leader-identity"><span className={`leader-rank rank-${entry.rank<=3?entry.rank:'other'}`}>{String(entry.rank).padStart(2,'0')}</span><span className="avatar">{entry.name.slice(0,1).toUpperCase()}</span><span><b>{entry.name}</b>{data.currentUserId===entry.userId&&<small>YOU</small>}</span></div><span className="mono">LVL {entry.level}</span><span className="mono">{entry.missions}</span><strong>{entry.xp.toLocaleString()} <small>XP</small></strong></div>)}</section><div className="leader-foot mono">RANKINGS PERIOD: {data?.period?.toUpperCase()||period.toUpperCase()} <span>·</span> UPDATED FROM VERIFIED MISSION ATTEMPTS</div>
+  </div></Shell>;
+}
+function Profile() {
+  const profile=useGetMyProfile();const update=useUpdateMyProfile();const client=useQueryClient();const [name,setName]=useState('');const[userReady,setUserReady]=useState(false);const[message,setMessage]=useState('');const[error,setError]=useState('');
+  const user=profile.data?.data?.user;
+  useEffect(()=>{if(user&&!userReady){setName(user.name);setUserReady(true);}},[user,userReady]);
+  const save=(e:FormEvent)=>{e.preventDefault();setMessage('');setError('');update.mutate({data:{name}},{onSuccess:(res)=>{client.setQueryData(getGetMyProfileQueryKey(),res);client.setQueryData(getGetCurrentUserQueryKey(),res);setMessage('Profile updated successfully.');},onError:e=>setError(prettyError(e))});};
+  return <Shell><div className="content-wrap narrow-content">{profile.isLoading?<Loading label="Loading profile"/>:profile.isError?<Notice>{prettyError(profile.error)}</Notice>:user&&<><PageHeading eyebrow="OPERATOR RECORD" title="Profile settings" subtitle="Manage the identity shown across your learning workspace."/><div className={`${box} profile-card`}><div className="profile-identity"><div className="profile-avatar">{user.name.slice(0,1).toUpperCase()}</div><div><span className="eyebrow">ACTIVE OPERATOR</span><h2 className="display">{user.name}</h2><p>{user.email}</p></div><span className="tag">{user.role.toUpperCase()}</span></div><form onSubmit={save} className="form-stack profile-form"><Field label="Display name" value={name} onChange={(e:any)=>setName(e.target.value)} minLength={2} maxLength={80} required data-testid="input-profile-name"/><div className="read-only-field"><span>Email address</span><b>{user.email}</b><small>Email is managed by your account credentials.</small></div><div className="profile-stats"><div><span>LEVEL</span><b>{user.level}</b></div><div><span>EXPERIENCE</span><b>{user.xp.toLocaleString()} XP</b></div><div><span>STREAK</span><b>{user.streak} days</b></div><div><span>MEMBER SINCE</span><b>{new Date(user.createdAt).toLocaleDateString()}</b></div></div>{message&&<Notice tone="success">{message}</Notice>}{error&&<Notice>{error}</Notice>}<Button type="submit" disabled={update.isPending||!name.trim()||name===user.name}>{update.isPending?'Saving changes…':'Save profile'} <Check size={15}/></Button></form></div></>}</div></Shell>;
+}
+function Mentor() {
+  const ask=useAskCyberMentor();const[question,setQuestion]=useState('');const[answer,setAnswer]=useState<any>(null);const[error,setError]=useState('');
+  const prompts=['How can I verify a sender domain safely?','What should I do after clicking a suspicious link?','How do passkeys reduce phishing risk?'];
+  const submit=(e:FormEvent)=>{e.preventDefault();setError('');setAnswer(null);ask.mutate({data:{question}},{onSuccess:r=>{setAnswer(r.data);setQuestion('');},onError:e=>setError(prettyError(e))});};
+  return <NeedAuth><Shell><div className="content-wrap mentor-layout fade-in"><PageHeading eyebrow="DEFENSIVE KNOWLEDGE NODE" title="Ask the Cyber Mentor" subtitle="Get practical, safety-first guidance for protecting people and systems."/><div className="mentor-grid"><section className={`${box} mentor-chat`}><div className="mentor-top"><div className="mentor-mark"><MessageSquareText size={19}/></div><div><b>Defensive Cyber Mentor</b><small><i/> READY · SAFE GUIDANCE ONLY</small></div><span className="mono">CQ / AI</span></div><div className="mentor-content">{answer?<div className="mentor-answer"><div className="eyebrow">{answer.topic}{answer.safetyRedirect&&' / SAFETY REDIRECT'}</div><p>{answer.answer}</p><button className="text-link" onClick={()=>setAnswer(null)}>Ask another question <ArrowRight size={14}/></button></div>:<div className="mentor-welcome"><div className="mentor-glyph"><Shield size={29}/></div><span className="eyebrow">HOW CAN I HELP YOU DEFEND?</span><p>Ask about spotting threats, safe response steps, or security fundamentals. I won't provide instructions for offensive activity.</p><div className="prompt-list">{prompts.map(x=><button key={x} onClick={()=>setQuestion(x)}>{x}<ArrowUpRight size={14}/></button>)}</div></div>}</div>{error&&<Notice>{error}</Notice>}<form className="mentor-input" onSubmit={submit}><textarea value={question} onChange={e=>setQuestion(e.target.value)} minLength={3} maxLength={1000} placeholder="Ask a defensive cybersecurity question…" required data-testid="input-mentor-question"/><div><span className="mono">{question.length} / 1000</span><Button type="submit" disabled={ask.isPending||question.trim().length<3}>{ask.isPending?'Thinking…':'Send question'} <ArrowRight size={15}/></Button></div></form></section><aside className={`${box} mentor-aside`}><div className="eyebrow">MENTOR GUIDELINES</div><div className="guideline"><ShieldCheck size={17}/><span><b>Defense first</b><small>Guidance focuses on prevention, recognition, and response.</small></span></div><div className="guideline"><LockKeyhole size={17}/><span><b>Keep it safe</b><small>Never share live credentials, private data, or active targets.</small></span></div><div className="guideline"><BookOpen size={17}/><span><b>Learn by doing</b><small>Pair mentor guidance with a safe mission investigation.</small></span></div><Link href="/" className="aside-link">Browse learning missions <ArrowRight size={14}/></Link></aside></div></div></Shell></NeedAuth>;
+}
+const freshMissionInput = (): MissionInput => ({title:'',description:'',category:'Email Security',difficulty:Difficulty.Medium,estimatedMinutes:10,xpReward:100,scenario:{senderName:'',senderEmail:'',recipientName:'',subject:'',receivedAt:'',body:'',displayedUrl:null,attachment:null},answerAssessment:Assessment.PHISHING,correctFindings:[]});
+function Admin() {
+  const q=useListAdminMissions();const create=useCreateMission();const update=useUpdateMission();const archive=useArchiveMission();const client=useQueryClient();const[form,setForm]=useState<MissionInput|null>(null);const[editing,setEditing]=useState<number|null>(null);const[error,setError]=useState('');const[notice,setNotice]=useState('');
+  const missions=q.data?.data?.missions||[];
+  const set=(key:keyof MissionInput,value:any)=>setForm(cur=>cur?{...cur,[key]:value}:cur);
+  const setScenario=(key:keyof MissionInput['scenario'],value:string)=>setForm(cur=>cur?{...cur,scenario:{...cur.scenario,[key]:value||null}}:cur);
+  const open=(m?:any)=>{if(m){setEditing(m.id);setForm({...m,scenario:{...m.scenario},correctFindings:[...m.correctFindings]});}else{setEditing(null);setForm(freshMissionInput());}setError('');setNotice('');};
+  const finish=()=>{setForm(null);setEditing(null);client.invalidateQueries({queryKey:getListAdminMissionsQueryKey()});client.invalidateQueries({queryKey:getListMissionsQueryKey()});setNotice(editing?'Mission updated.':'Mission created.');};
+  const submit=(e:FormEvent)=>{e.preventDefault();if(!form)return;setError('');const task=editing?update:create;task.mutate(editing?{id:editing,data:form} as any:{data:form} as any,{onSuccess:finish,onError:e=>setError(prettyError(e))});};
+  return <NeedAuth admin><Shell><div className="content-wrap admin-wrap"><PageHeading eyebrow="ADMINISTRATION / CONTENT CONTROL" title="Mission control" subtitle="Author and maintain safe, simulated investigations." right={<Button onClick={()=>open()}><Plus size={16}/> New mission</Button>}/>{notice&&<Notice tone="success">{notice}</Notice>}{q.isLoading?<Loading label="Loading mission records"/>:q.isError?<><Notice>{prettyError(q.error)}</Notice><Button variant="outline" onClick={()=>q.refetch()}>Retry</Button></>:<section className={`${box} admin-table`}><div className="admin-table-head"><span>MISSION</span><span>CLASSIFICATION</span><span>DIFFICULTY</span><span>REWARD</span><span>ACTIONS</span></div>{missions.length===0?<div className="empty-state"><Radar size={25}/><b>No missions authored</b><span>Create a safe simulation to populate the catalog.</span><Button onClick={()=>open()}><Plus size={15}/> Create mission</Button></div>:missions.map(m=><div className="admin-row" key={m.id}><div><b>{m.title}</b><small>{m.category} · {m.estimatedMinutes} minutes</small></div><span className={`assessment-label ${m.answerAssessment.toLowerCase()}`}>{m.answerAssessment}</span><span className="mono">{m.difficulty}</span><span className="mono">{m.xpReward} XP</span><div className="admin-actions"><Button variant="quiet" onClick={()=>open(m)}>Edit</Button><Button variant="danger" onClick={()=>{if(window.confirm(`Archive “${m.title}”?`)){archive.mutate({id:m.id},{onSuccess:()=>{client.invalidateQueries({queryKey:getListAdminMissionsQueryKey()});client.invalidateQueries({queryKey:getListMissionsQueryKey()});setNotice('Mission archived.');},onError:e=>setError(prettyError(e))});}}} disabled={archive.isPending}>Archive</Button></div></div>)}</section>}
+    {error&&<Notice>{error}</Notice>}{form&&<div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setForm(null);}}><div className="mission-modal"><div className="modal-title"><div><span className="eyebrow">{editing?'EDIT MISSION':'MISSION AUTHORING'}</span><h2 className="display">{editing?'Update scenario':'Create a simulation'}</h2></div><button className="icon-btn" onClick={()=>setForm(null)} aria-label="Close"><X size={18}/></button></div><form className="admin-form" onSubmit={submit}><div className="form-two"><Field label="Mission title" value={form.title} onChange={(e:any)=>set('title',e.target.value)} minLength={3} maxLength={120} required/><Field label="Category" value={form.category} onChange={(e:any)=>set('category',e.target.value)} required/></div><label className="field"><span>Description</span><textarea value={form.description} onChange={e=>set('description',e.target.value)} minLength={10} required/></label><div className="form-three"><SelectField label="Difficulty" value={form.difficulty} onChange={v=>set('difficulty',v)} options={['Easy','Medium','Hard','Expert']}/><Field label="Minutes" type="number" min={1} max={180} value={form.estimatedMinutes} onChange={(e:any)=>set('estimatedMinutes',Number(e.target.value))}/><Field label="XP reward" type="number" min={10} max={500} value={form.xpReward} onChange={(e:any)=>set('xpReward',Number(e.target.value))}/></div><div className="form-divider">SIMULATED MESSAGE DETAILS</div><div className="form-two"><Field label="Sender name" value={form.scenario.senderName} onChange={(e:any)=>setScenario('senderName',e.target.value)} required/><Field label="Sender email" type="email" value={form.scenario.senderEmail} onChange={(e:any)=>setScenario('senderEmail',e.target.value)} required/><Field label="Recipient name" value={form.scenario.recipientName} onChange={(e:any)=>setScenario('recipientName',e.target.value)} required/><Field label="Received at" value={form.scenario.receivedAt} onChange={(e:any)=>setScenario('receivedAt',e.target.value)} placeholder="Today, 09:42 AM" required/></div><Field label="Subject" value={form.scenario.subject} onChange={(e:any)=>setScenario('subject',e.target.value)} required/><label className="field"><span>Message body</span><textarea className="body-editor" value={form.scenario.body} onChange={e=>setScenario('body',e.target.value)} required/></label><div className="form-two"><Field label="Displayed URL (optional)" value={form.scenario.displayedUrl||''} onChange={(e:any)=>setScenario('displayedUrl',e.target.value)} placeholder="https://example.test"/><Field label="Attachment (optional)" value={form.scenario.attachment||''} onChange={(e:any)=>setScenario('attachment',e.target.value)} placeholder="document.pdf"/></div><div className="form-divider">ANSWER KEY · ADMIN ONLY</div><SelectField label="Correct assessment" value={form.answerAssessment} onChange={v=>set('answerAssessment',v)} options={['SAFE','SUSPICIOUS','PHISHING']}/><label className="field"><span>Expected finding signals (one per line)</span><textarea value={form.correctFindings.join('\n')} onChange={e=>set('correctFindings',e.target.value.split('\n').map(x=>x.trim()).filter(Boolean))} required/></label><div className="modal-actions"><Button variant="outline" onClick={()=>setForm(null)}>Cancel</Button><Button type="submit" disabled={create.isPending||update.isPending}>{create.isPending||update.isPending?'Saving…':editing?'Save changes':'Create mission'} <ArrowRight size={15}/></Button></div></form></div></div>}
+  </div></Shell></NeedAuth>;
+}
+function SelectField({label,value,onChange,options}:{label:string;value:string;onChange:(v:string)=>void;options:string[]}) {return <label className="field"><span>{label}</span><select value={value} onChange={e=>onChange(e.target.value)}>{options.map(x=><option key={x} value={x}>{x}</option>)}</select></label>}
+function RoutedErrorBoundary({children}:{children:ReactNode}){const [loc]=useLocation();return <ErrorBoundary resetKey={loc}>{children}</ErrorBoundary>}
+function Router(){return <RoutedErrorBoundary><Switch>
+  <Route path="/" component={Home}/><Route path="/login"><AuthPage register={false}/></Route><Route path="/register"><AuthPage register/></Route>
+  <Route path="/dashboard"><NeedAuth><Dashboard/></NeedAuth></Route>
+  <Route path="/missions/:id"><NeedAuth><MissionPage/></NeedAuth></Route>
+  <Route path="/leaderboard" component={Leaderboard}/><Route path="/profile"><NeedAuth><Profile/></NeedAuth></Route><Route path="/mentor" component={Mentor}/><Route path="/admin" component={Admin}/>
+  <Route component={NotFound}/>
+</Switch></RoutedErrorBoundary>}
+function App(){return <QueryClientProvider client={qc}><TooltipProvider><Router/><Toaster/></TooltipProvider></QueryClientProvider>}
 export default App;
