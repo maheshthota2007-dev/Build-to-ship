@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "CyberQuest AI"
+description = "An AI-powered cybersecurity defense training app where learners investigate safe simulated incidents, receive structured feedback, build skills, and track progress."
+version = "1.0.0"
+id = "artifacts/cyberquest-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22204
+
+[services.development]
+run = "pnpm --filter @workspace/cyberquest-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cyberquest-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cyberquest-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22204"
+BASE_PATH = "/"

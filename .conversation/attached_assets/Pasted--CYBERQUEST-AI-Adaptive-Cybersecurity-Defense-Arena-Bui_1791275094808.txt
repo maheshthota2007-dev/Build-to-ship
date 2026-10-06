@@ -1,0 +1,1236 @@
+# CYBERQUEST AI
+
+## Adaptive Cybersecurity Defense Arena
+
+Build a complete, production-quality full-stack web application called **CyberQuest AI**.
+
+### Hackathon Problem Statement
+
+Create an interactive learning platform with cybersecurity lessons, quizzes, challenges, progress tracking, and leaderboards.
+
+### Our Solution
+
+CyberQuest AI transforms traditional cybersecurity learning into an interactive, gamified defensive training experience.
+
+Instead of only reading lessons and answering basic quizzes, users become **Cyber Defenders** who investigate simulated cybersecurity incidents, make security decisions, receive AI-powered feedback, earn XP and badges, improve their skills, and compete on a leaderboard.
+
+The application must be a REAL full-stack application, not a static frontend or simple AI chatbot.
+
+---
+
+# 1. HACKATHON REQUIREMENTS — MANDATORY
+
+The project must satisfy these requirements:
+
+* User registration
+* User login
+* User logout
+* bcrypt password hashing
+* JWT authentication
+* Protected dashboard
+* User profile
+* Full CRUD operations
+* Search/filter/sort functionality
+* REST APIs
+* Input validation using Zod
+* Authentication middleware
+* Proper HTTP status codes
+* PostgreSQL database persistence
+* User data isolation
+* Backend-only Gemini API integration
+* Structured JSON AI responses
+* Secure environment variables
+* Responsive UI
+* Live deployment
+* Production-quality error handling
+
+Do NOT expose the Gemini API key in frontend code.
+
+Do NOT commit secrets to GitHub.
+
+The application must be deployable and publicly accessible.
+
+---
+
+# 2. TECHNOLOGY STACK
+
+Use the following stack:
+
+## Frontend
+
+* React
+* Vite
+* TypeScript
+* React Router
+* Tailwind CSS
+* Lucide React icons
+* Axios or Fetch API
+
+## Backend
+
+* Node.js
+* Express.js
+* TypeScript
+* JWT
+* bcrypt
+* Zod
+
+## Database
+
+* PostgreSQL
+* Prisma ORM
+
+Use Replit PostgreSQL for the primary deployment.
+
+## AI
+
+Use Google Gemini through the official Node.js SDK:
+
+@google/genai
+
+Gemini calls MUST happen only on the backend.
+
+## Deployment
+
+Make the application Replit deployment ready.
+
+---
+
+# 3. IMPORTANT ARCHITECTURE
+
+Use a clean structure similar to:
+
+client/
+src/
+components/
+pages/
+layouts/
+hooks/
+services/
+types/
+lib/
+
+server/
+src/
+controllers/
+routes/
+middleware/
+services/
+validators/
+utils/
+ai/
+db/
+
+prisma/
+schema.prisma
+seed.ts
+
+README.md
+.env.example
+
+Keep frontend and backend responsibilities separate.
+
+Do not put everything into one file.
+
+---
+
+# 4. APPLICATION BRAND
+
+Application name:
+
+**CyberQuest AI**
+
+Tagline:
+
+**Learn. Investigate. Defend. Level Up.**
+
+Secondary tagline:
+
+**Train like a defender. Think like a security analyst.**
+
+Use a premium cybersecurity command-center visual style.
+
+Design should be:
+
+* Dark
+* Futuristic
+* Professional
+* Clean
+* Responsive
+* Modern
+* Cybersecurity themed
+
+Do NOT make it look like a childish game.
+
+Use subtle neon accents, security dashboard cards, clean typography, icons, progress bars and tasteful animations.
+
+Avoid excessive animations.
+
+---
+
+# 5. LANDING PAGE
+
+Create an impressive landing page.
+
+Hero:
+
+CYBERQUEST AI
+
+"Learn. Investigate. Defend. Level Up."
+
+Description:
+
+"An AI-powered cybersecurity training arena where you learn through realistic defensive missions, interactive challenges and personalized feedback."
+
+Buttons:
+
+* Start Your Mission
+* Explore Challenges
+
+Show statistics:
+
+* 1,000+ Cyber Defenders
+* 50+ Security Missions
+* 100+ Challenges
+* AI-Powered Training
+
+Add sections:
+
+## Why CyberQuest?
+
+Explain:
+
+Traditional cybersecurity learning is often passive.
+
+CyberQuest allows users to:
+
+* Investigate simulated incidents
+* Make security decisions
+* Learn from mistakes
+* Receive AI feedback
+* Earn XP
+* Unlock badges
+* Compete on leaderboards
+
+## How It Works
+
+1. Choose a mission
+2. Investigate the scenario
+3. Make a security decision
+4. Receive AI feedback
+5. Earn XP
+6. Improve your skills
+
+## Featured Missions
+
+Show several mission cards.
+
+---
+
+# 6. AUTHENTICATION
+
+Implement complete authentication.
+
+Pages:
+
+* Register
+* Login
+* Logout
+
+Registration:
+
+* Full name
+* Email
+* Password
+
+Use bcrypt to hash passwords.
+
+Use JWT for authentication.
+
+Never store plaintext passwords.
+
+Protect dashboard routes.
+
+Create authentication middleware on the Express backend.
+
+Return appropriate HTTP status codes.
+
+Example API routes:
+
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET /api/auth/me
+
+---
+
+# 7. USER DASHBOARD
+
+After login, show:
+
+"Welcome back, Defender."
+
+Display:
+
+* Level
+* XP
+* XP required for next level
+* Missions completed
+* Challenge accuracy
+* Current streak
+* Global rank
+* Badges
+
+Example:
+
+LEVEL 7
+
+1,420 / 2,000 XP
+
+██████████████░░░░
+
+Add large actions:
+
+* Continue Mission
+* Daily Challenge
+* Cyber Mentor AI
+* Leaderboard
+
+Also display:
+
+### Strengths
+
+Phishing: 86%
+Password Security: 78%
+
+### Weak Areas
+
+Web Security: 52%
+Network Security: 48%
+
+---
+
+# 8. MISSION SYSTEM
+
+Create a complete mission system.
+
+Mission categories:
+
+* Phishing
+* Password Security
+* Social Engineering
+* Network Security
+* Malware Awareness
+* Web Security
+* Data Privacy
+* Incident Response
+* Digital Forensics
+* Secure Coding
+
+Mission fields:
+
+* id
+* title
+* description
+* category
+* difficulty
+* estimatedMinutes
+* xpReward
+* content
+* status
+* createdAt
+* updatedAt
+
+Difficulty:
+
+* Easy
+* Medium
+* Hard
+* Expert
+
+Admins must be able to:
+
+CREATE missions
+READ missions
+UPDATE missions
+DELETE/ARCHIVE missions
+
+This provides the required CRUD functionality.
+
+---
+
+# 9. FEATURED CORE EXPERIENCE
+
+# PHISHING INVESTIGATION LAB
+
+This is the main hackathon demonstration feature.
+
+Create an interactive simulated inbox.
+
+Show realistic fictional emails.
+
+Examples:
+
+* HR announcement
+* Password reset
+* Bank notification
+* Delivery notification
+* Company invoice
+* Security alert
+
+Do NOT use real malicious links.
+
+Everything must remain safely simulated.
+
+The user selects an email and investigates:
+
+* Sender
+* Sender domain
+* URL
+* Attachment
+* Message wording
+* Urgency
+* Credential request
+
+Allow users to mark suspicious elements.
+
+Then ask:
+
+"What is your assessment?"
+
+Options:
+
+SAFE
+SUSPICIOUS
+PHISHING
+
+The user submits the investigation.
+
+Calculate a score.
+
+Example:
+
+Sender identified: +20
+Fake domain identified: +20
+Suspicious URL identified: +20
+Urgency identified: +20
+Credential request identified: +20
+
+Then send the result to the backend AI endpoint.
+
+---
+
+# 10. GEMINI AI ANALYSIS
+
+Create a backend-only Gemini service.
+
+Endpoint:
+
+POST /api/ai/analyze-mission
+
+The frontend must NEVER call Gemini directly.
+
+The backend should send:
+
+* Mission information
+* User answer
+* User findings
+* Score
+* Previous performance
+* Mission category
+
+to Gemini.
+
+Gemini must return structured JSON.
+
+Use Zod to validate the AI response.
+
+Example schema:
+
+{
+"riskLevel": "HIGH",
+"score": 85,
+"correctFindings": [
+"Suspicious sender domain",
+"Urgent credential request"
+],
+"missedFindings": [
+"URL mismatch"
+],
+"explanation": "The message contains several phishing indicators.",
+"recommendations": [
+"Verify the sender domain",
+"Avoid clicking suspicious links"
+],
+"nextRecommendedTopic": "URL Safety",
+"encouragement": "Good investigation. Improve your URL analysis."
+}
+
+Validate this response using Zod.
+
+If Gemini fails, provide a safe fallback response so the application remains functional.
+
+---
+
+# 11. AI CYBER MENTOR
+
+Create a page:
+
+**Cyber Mentor AI**
+
+Users can ask cybersecurity learning questions.
+
+Example questions:
+
+"What is phishing?"
+
+"What is MFA?"
+
+"How does ransomware work?"
+
+"What is SQL injection?"
+
+"How can I secure my account?"
+
+"Explain zero trust."
+
+The AI must behave as a defensive cybersecurity education assistant.
+
+The AI should NOT provide instructions for:
+
+* credential theft
+* malware creation
+* unauthorized access
+* real-world exploitation
+* phishing attacks
+* destructive attacks
+
+Redirect harmful requests toward defensive education.
+
+All AI requests must go through the backend.
+
+Store AI conversation metadata in the database.
+
+Do not expose API keys.
+
+---
+
+# 12. PERSONALIZED AI LEARNING
+
+After a user completes multiple challenges, analyze their performance.
+
+Example:
+
+User repeatedly fails URL-analysis questions.
+
+Display:
+
+"Your weakest skill is URL Safety."
+
+Then recommend:
+
+Recommended Mission:
+
+"URL Safety: Level 2"
+
+Show:
+
+WHY THIS MISSION?
+
+"You missed URL-related indicators in 3 recent challenges."
+
+This makes AI part of the actual product rather than simply a chatbot.
+
+---
+
+# 13. QUIZ SYSTEM
+
+Build a reusable quiz engine.
+
+Question types:
+
+* Multiple choice
+* True/False
+* Scenario-based
+* Security decision
+* Identify suspicious element
+
+After answering:
+
+Show:
+
+* Correct/Incorrect
+* Explanation
+* Score
+* XP earned
+
+Store attempts in PostgreSQL.
+
+Track historical performance.
+
+Allow search/filter by category and difficulty.
+
+---
+
+# 14. DAILY CYBER CHALLENGE
+
+Create a daily challenge system.
+
+Example:
+
+"Can you identify the phishing attempt?"
+
+Reward:
+
++50 XP
+
+Track:
+
+* Daily completion
+* Streak
+* XP
+
+Display:
+
+🔥 7 Day Defender Streak
+
+---
+
+# 15. XP AND LEVEL SYSTEM
+
+Implement real XP calculations.
+
+Example:
+
+Level 1: 0 XP
+Level 2: 100 XP
+Level 3: 250 XP
+Level 4: 450 XP
+Level 5: 700 XP
+Level 6: 1000 XP
+Level 7: 1400 XP
+Level 8: 1850 XP
+Level 9: 2400 XP
+Level 10: 3000 XP
+
+Continue the progression system.
+
+Every completed mission should award XP.
+
+Prevent users from repeatedly farming unlimited XP from the same completed mission.
+
+---
+
+# 16. BADGES
+
+Create achievement badges.
+
+Examples:
+
+### First Defender
+
+Complete first mission.
+
+### Phishing Hunter
+
+Correctly identify 10 phishing attempts.
+
+### Password Guardian
+
+Complete password security training.
+
+### Incident Responder
+
+Complete incident response mission.
+
+### Digital Detective
+
+Complete digital forensics mission.
+
+### Cyber Streak
+
+Maintain a 7-day streak.
+
+### Cyber Master
+
+Reach Level 10.
+
+Store badges in PostgreSQL.
+
+Display locked and unlocked badges.
+
+---
+
+# 17. LEADERBOARD
+
+Create:
+
+Global leaderboard
+Weekly leaderboard
+Monthly leaderboard
+
+Columns:
+
+* Rank
+* User
+* Level
+* XP
+* Missions
+* Badges
+
+Highlight the current user.
+
+Prevent obvious leaderboard manipulation.
+
+---
+
+# 18. LEARNING LIBRARY
+
+Create cybersecurity lessons for:
+
+1. Cybersecurity Fundamentals
+2. Password Security
+3. MFA
+4. Phishing
+5. Social Engineering
+6. Malware Awareness
+7. Network Security
+8. Web Security
+9. Data Privacy
+10. Incident Response
+
+Each lesson should contain:
+
+* Short explanation
+* Examples
+* Key takeaways
+* Quiz
+* Challenge
+
+Track completion percentage.
+
+---
+
+# 19. PROGRESS ANALYTICS
+
+Create a progress dashboard.
+
+Show:
+
+* XP growth
+* Quiz accuracy
+* Missions completed
+* Strongest topics
+* Weakest topics
+* Streak
+* Badges
+
+Use charts.
+
+Example:
+
+Phishing        86%
+Passwords       78%
+Network         62%
+Web Security    52%
+
+---
+
+# 20. USER PROFILE
+
+Profile page:
+
+* Avatar
+* Name
+* Email
+* Level
+* XP
+* Rank
+* Badges
+* Missions
+* Streak
+* Skill scores
+
+Allow users to update profile information.
+
+Ensure users can only access and modify their own profile.
+
+---
+
+# 21. ADMIN DASHBOARD
+
+Create role-based admin access.
+
+Admin dashboard should show:
+
+* Total users
+* Active users
+* Missions
+* Challenges
+* Mission completion rate
+* Average quiz score
+* Most popular mission
+* Most difficult mission
+
+Admin features:
+
+* Create mission
+* Read mission
+* Update mission
+* Archive/delete mission
+* Create quiz questions
+* Edit quiz questions
+* View user performance
+
+Protect all admin APIs using role-based authorization.
+
+---
+
+# 22. DATABASE SCHEMA
+
+Use Prisma + PostgreSQL.
+
+Create appropriate models including:
+
+User
+Profile
+Mission
+Lesson
+Question
+QuizAttempt
+Challenge
+ChallengeAttempt
+UserProgress
+Badge
+UserBadge
+DailyChallenge
+Leaderboard
+AIFeedback
+AIConversation
+
+Every primary record should have:
+
+createdAt
+updatedAt
+
+Use proper relationships.
+
+Ensure user data is scoped correctly.
+
+A user must NEVER be able to access another user's private records.
+
+---
+
+# 23. SEARCH AND FILTERING
+
+Implement search/filter/sort functionality.
+
+Mission search:
+
+* Search by title
+* Category
+* Difficulty
+
+Challenge filtering:
+
+* Completed
+* Not completed
+* Difficulty
+
+AI feedback history:
+
+* Date
+* Mission
+* Score
+* Category
+
+Leaderboard:
+
+* Global
+* Weekly
+* Monthly
+
+---
+
+# 24. SECURITY REQUIREMENTS
+
+Implement:
+
+* bcrypt password hashing
+* JWT authentication
+* Protected routes
+* Role-based authorization
+* Zod validation
+* Secure API handling
+* Error handling
+* Rate limiting where appropriate
+* User data isolation
+* Environment variables
+* Secure CORS configuration
+* No secrets in frontend
+* No secrets in GitHub
+
+Never expose:
+
+GEMINI_API_KEY
+JWT_SECRET
+DATABASE_URL
+
+to the browser.
+
+Do not store passwords from the password-strength educational simulator.
+
+Do not build real phishing infrastructure.
+
+Do not build real malware.
+
+Do not build real attack tools.
+
+All cybersecurity scenarios must be simulated and educational.
+
+---
+
+# 25. PASSWORD SECURITY EDUCATION
+
+Create a password-strength learning feature.
+
+IMPORTANT:
+
+Never store the password entered into this feature.
+
+Evaluate only in memory:
+
+* Length
+* Character variety
+* Repetition
+* Common patterns
+* Predictability
+
+Return:
+
+Very Weak
+Weak
+Moderate
+Strong
+Very Strong
+
+Give security recommendations.
+
+Never send or persist the entered password unnecessarily.
+
+---
+
+# 26. RESPONSIVE UI
+
+Application must work on:
+
+* Desktop
+* Laptop
+* Tablet
+* Mobile
+
+Create a responsive sidebar.
+
+Mobile should use a mobile navigation menu.
+
+Ensure tables and charts work on small screens.
+
+---
+
+# 27. ERROR HANDLING
+
+Create professional:
+
+* Loading states
+* Empty states
+* Error states
+* Unauthorized states
+* 404 page
+* Form validation
+* API error messages
+* AI failure fallback
+
+Never expose stack traces to normal users.
+
+---
+
+# 28. DEMO DATA
+
+Seed the database with realistic development data.
+
+Create at least:
+
+10 missions
+30 quiz questions
+10 challenges
+10 badges
+15 leaderboard users
+
+Create a development admin account through environment variables or clearly documented development setup.
+
+Do not hardcode production secrets.
+
+---
+
+# 29. API DESIGN
+
+Create clean REST endpoints.
+
+Authentication:
+
+POST /api/auth/register
+POST /api/auth/login
+GET /api/auth/me
+
+Users:
+
+GET /api/users/me
+PUT /api/users/me
+
+Missions:
+
+GET /api/missions
+GET /api/missions/:id
+POST /api/missions
+PUT /api/missions/:id
+DELETE /api/missions/:id
+
+Challenges:
+
+GET /api/challenges
+GET /api/challenges/:id
+POST /api/challenges/:id/attempt
+
+Progress:
+
+GET /api/progress
+GET /api/leaderboard
+
+AI:
+
+POST /api/ai/analyze-mission
+POST /api/ai/mentor
+
+Use proper HTTP status codes and consistent JSON responses.
+
+---
+
+# 30. API RESPONSE FORMAT
+
+Use consistent responses.
+
+Success:
+
+{
+"success": true,
+"data": {}
+}
+
+Error:
+
+{
+"success": false,
+"error": {
+"code": "VALIDATION_ERROR",
+"message": "Invalid request"
+}
+}
+
+---
+
+# 31. HACKATHON DEMO FLOW
+
+Optimize the application for a 2–3 minute demo.
+
+The ideal demo:
+
+1. Login
+2. Dashboard
+3. Open phishing mission
+4. Investigate simulated email
+5. Submit answer
+6. Backend calls Gemini
+7. Gemini returns structured analysis
+8. Show AI feedback
+9. Award XP
+10. Unlock badge
+11. Show personalized recommendation
+12. Show leaderboard
+13. Briefly show admin CRUD
+14. Show database persistence
+
+The main demo should feel smooth and fast.
+
+---
+
+# 32. LANDING PAGE MESSAGE
+
+Use this statement prominently:
+
+"Cybersecurity isn't learned by reading alone."
+
+Then:
+
+"Investigate. Decide. Defend."
+
+Explain:
+
+"CyberQuest AI turns cybersecurity education into practical defensive training through simulated incidents, interactive challenges and AI-powered personalized feedback."
+
+---
+
+# 33. README
+
+Create a comprehensive README.md.
+
+Include:
+
+* Project name
+* Problem statement
+* Problem analysis
+* Solution
+* Target users
+* Key features
+* AI architecture
+* Full-stack architecture
+* Database schema
+* API endpoints
+* Security architecture
+* Environment variables
+* Local setup
+* Replit setup
+* Deployment instructions
+* Demo credentials
+* Future improvements
+
+Add architecture diagram in Markdown.
+
+Clearly explain:
+
+Frontend
+→ Express Backend
+→ Gemini
+→ PostgreSQL
+
+---
+
+# 34. .ENV.EXAMPLE
+
+Create:
+
+DATABASE_URL=
+JWT_SECRET=
+GEMINI_API_KEY=
+NODE_ENV=
+
+Never include real credentials.
+
+---
+
+# 35. FINAL QUALITY CHECK
+
+Before considering the project complete:
+
+1. Run the frontend.
+2. Run the backend.
+3. Verify database connection.
+4. Run Prisma migrations.
+5. Seed database.
+6. Test registration.
+7. Test login.
+8. Test logout.
+9. Test protected routes.
+10. Test mission CRUD.
+11. Test quiz attempts.
+12. Test XP.
+13. Test badges.
+14. Test leaderboard.
+15. Test Gemini endpoint.
+16. Verify Gemini is backend-only.
+17. Verify Zod validation.
+18. Verify no API keys are exposed.
+19. Test responsive UI.
+20. Test production build.
+21. Fix TypeScript errors.
+22. Fix runtime errors.
+23. Deploy to Replit.
+24. Test the public URL.
+
+Do NOT leave fake buttons or unfinished pages.
+
+Every major button must perform a real action.
+
+Use realistic content instead of Lorem Ipsum.
+
+---
+
+# 36. HACKATHON PRIORITY
+
+Because this project is being built under a compressed hackathon schedule, prioritize working functionality over excessive features.
+
+Priority 1:
+
+Authentication
+PostgreSQL
+Mission CRUD
+Phishing Investigation
+Gemini backend integration
+Structured AI JSON
+XP
+Progress
+Leaderboard
+Deployment
+
+Priority 2:
+
+Badges
+Daily Challenge
+AI personalization
+Admin analytics
+
+Priority 3:
+
+Additional cybersecurity simulations
+
+Do not sacrifice the core working application to add unnecessary features.
+
+---
+
+# 37. FINAL PRODUCT POSITIONING
+
+CyberQuest AI should be presented as:
+
+"An AI-powered adaptive cybersecurity defense training platform."
+
+The key innovation is:
+
+Traditional platforms:
+Lesson → Quiz → Score
+
+CyberQuest AI:
+
+Scenario
+→ Investigation
+→ Security Decision
+→ AI Analysis
+→ Personalized Feedback
+→ XP
+→ Skill Progress
+→ Next Recommended Mission
+
+The AI must be a meaningful backend capability, not merely a chatbot added to the UI.
+
+Build the project as a serious hackathon submission that demonstrates:
+
+* Full-stack engineering
+* Secure authentication
+* Database design
+* REST API architecture
+* Backend AI integration
+* Structured AI outputs
+* Cybersecurity awareness
+* Gamification
+* Personalized learning
+* Production deployment
+
+Start by creating the complete project structure, database schema, authentication system and core API architecture. Then implement the main phishing investigation workflow before adding secondary features.
