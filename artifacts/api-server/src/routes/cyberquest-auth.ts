@@ -47,40 +47,45 @@ function checkLoginLimit(ip: string): boolean {
   return existing.count <= 12;
 }
 
-router.post("/auth/register", async (req, res): Promise<void> => {
-  const parsed = RegisterBody.safeParse(req.body);
-  if (!parsed.success) {
-    errorResponse(res, 400, "VALIDATION_ERROR", "Check the name, email, and password fields.");
-    return;
+router.post("/auth/register", async (req, res, next): Promise<void> => {
+  try {
+    const parsed = RegisterBody.safeParse(req.body);
+    if (!parsed.success) {
+      errorResponse(res, 400, "VALIDATION_ERROR", "Check the name, email, and password fields.");
+      return;
+    }
+    const email = parsed.data.email.trim().toLowerCase();
+    const existing = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
+    if (existing.length) {
+      errorResponse(res, 409, "EMAIL_IN_USE", "An account with this email already exists.");
+      return;
+    }
+    const adminEmail = process.env.CYBERQUEST_ADMIN_EMAIL?.trim().toLowerCase();
+    const [user] = await db
+      .insert(usersTable)
+      .values({
+        name: parsed.data.name.trim(),
+        email,
+        passwordHash: await bcrypt.hash(parsed.data.password, 12),
+        role: adminEmail && email === adminEmail ? "admin" : "user",
+      })
+      .returning();
+    if (!user) {
+      errorResponse(res, 500, "ACCOUNT_CREATE_FAILED", "Unable to create the account.");
+      return;
+    }
+    setSessionCookie(res, signSession({ userId: user.id, role: user.role === "admin" ? "admin" : "user" }));
+    res.status(201).json(
+      RegisterResponse.parse({ success: true, data: { user: publicUser(user) } }),
+    );
+  } catch (error) {
+    req.log?.error({ err: error }, "Error during registration");
+    errorResponse(res, 500, "INTERNAL_ERROR", "Unable to create account. Please try again later.");
   }
-  const email = parsed.data.email.trim().toLowerCase();
-  const existing = await db
-    .select({ id: usersTable.id })
-    .from(usersTable)
-    .where(eq(usersTable.email, email))
-    .limit(1);
-  if (existing.length) {
-    errorResponse(res, 409, "EMAIL_IN_USE", "An account with this email already exists.");
-    return;
-  }
-  const adminEmail = process.env.CYBERQUEST_ADMIN_EMAIL?.trim().toLowerCase();
-  const [user] = await db
-    .insert(usersTable)
-    .values({
-      name: parsed.data.name.trim(),
-      email,
-      passwordHash: await bcrypt.hash(parsed.data.password, 12),
-      role: adminEmail && email === adminEmail ? "admin" : "user",
-    })
-    .returning();
-  if (!user) {
-    errorResponse(res, 500, "ACCOUNT_CREATE_FAILED", "Unable to create the account.");
-    return;
-  }
-  setSessionCookie(res, signSession({ userId: user.id, role: user.role === "admin" ? "admin" : "user" }));
-  res.status(201).json(
-    RegisterResponse.parse({ success: true, data: { user: publicUser(user) } }),
-  );
 });
 
 router.post("/auth/login", async (req, res): Promise<void> => {

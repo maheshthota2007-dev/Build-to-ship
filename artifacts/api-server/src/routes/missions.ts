@@ -287,7 +287,7 @@ router.post(
             assessment: saved.attempt.assessment,
             findings: saved.attempt.findings,
             score: saved.attempt.score,
-            createdAt: saved.attempt.createdAt.toISOString(),
+            createdAt: (typeof saved.attempt.createdAt === "string" ? new Date(saved.attempt.createdAt) : saved.attempt.createdAt).toISOString(),
           },
           feedback,
           xpAwarded: saved.xpAwarded,

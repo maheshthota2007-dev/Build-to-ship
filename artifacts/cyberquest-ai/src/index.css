@@ -2,6 +2,17 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './components.css';
+@import './theme.css';
+@import './theme2.css';
+@import './mentor.css';
+@import './leaderboard.css';
+@import './ai-tutor.css';
+@import './coding-lab.css';
+@import './programming-academy.css';
+@import './learning-academy.css';
+@import './cybersecurity-academy.css';
+@import './cyber-events.css';
+@import './lesson-page.css';
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
 

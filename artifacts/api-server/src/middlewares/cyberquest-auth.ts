@@ -45,12 +45,22 @@ export function signSession(claims: AuthClaims): string {
   });
 }
 
+function extractToken(req: Request): string | undefined {
+  const fromCookie = req.cookies?.[SESSION_COOKIE];
+  if (typeof fromCookie === "string") return fromCookie;
+  const header = req.headers.authorization;
+  if (typeof header === "string" && header.startsWith("Bearer ")) {
+    return header.slice(7).trim();
+  }
+  return undefined;
+}
+
 export function optionalAuth(
   req: Request,
   _res: Response,
   next: NextFunction,
 ): void {
-  const token = req.cookies?.[SESSION_COOKIE];
+  const token = extractToken(req);
   if (typeof token === "string") req.cyberquestUser = readClaims(token);
   next();
 }
@@ -60,7 +70,7 @@ export function requireAuth(
   res: Response,
   next: NextFunction,
 ): void {
-  const token = req.cookies?.[SESSION_COOKIE];
+  const token = extractToken(req);
   const claims = typeof token === "string" ? readClaims(token) : undefined;
   if (!claims) {
     errorResponse(res, 401, "UNAUTHORIZED", "Sign in to continue.");

@@ -1,0 +1,1159 @@
+/* ==========================================================================
+   CyberQuest AI - Cybersecurity Academy Platform Stylesheet
+   ========================================================================== */
+
+.cyber-academy-wrap {
+  width: min(1380px, calc(100% - 48px));
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px 0 88px;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Header Section
+   -------------------------------------------------------------------------- */
+.cyber-header-block {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.cyber-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #43e2b0;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  background: rgba(67, 226, 176, 0.08);
+  border: 1px solid rgba(67, 226, 176, 0.25);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.cyber-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #43e2b0;
+  box-shadow: 0 0 8px #43e2b0;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.cyber-main-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(34px, 4.5vw, 54px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #ebf6f3;
+  margin: 0 0 10px;
+  line-height: 1.15;
+}
+
+.cyber-main-subtitle {
+  font-size: 15px;
+  color: #8fa8a2;
+  line-height: 1.6;
+  max-width: 780px;
+  margin: 0 auto 16px;
+}
+
+.cyber-lifecycle-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: rgba(11, 22, 28, 0.85);
+  border: 1px solid rgba(67, 226, 176, 0.2);
+  padding: 6px 16px;
+  border-radius: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a4c4bd;
+}
+
+.cyber-lifecycle-step {
+  color: #ebf6f3;
+  letter-spacing: 0.05em;
+}
+
+.cyber-lifecycle-step.active {
+  color: #43e2b0;
+  text-shadow: 0 0 8px rgba(67, 226, 176, 0.4);
+}
+
+.cyber-lifecycle-arrow {
+  color: #446860;
+}
+
+/* --------------------------------------------------------------------------
+   Progress Dashboard Banner
+   -------------------------------------------------------------------------- */
+.cyber-dashboard-banner {
+  background: linear-gradient(135deg, rgba(12, 24, 31, 0.92) 0%, rgba(8, 16, 21, 0.95) 100%);
+  border: 1px solid rgba(67, 226, 176, 0.25);
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-dashboard-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #43e2b0, transparent);
+}
+
+.cyber-dashboard-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cyber-dashboard-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #43e2b0;
+  text-transform: uppercase;
+}
+
+.cyber-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.cyber-metric-card {
+  background: rgba(16, 30, 38, 0.7);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.cyber-metric-title {
+  font-size: 12px;
+  color: #7d9e96;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.cyber-metric-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ebf6f3;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.cyber-metric-sub {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6d938b;
+  font-family: 'Manrope', sans-serif;
+}
+
+.cyber-progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cyber-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: #8daea5;
+}
+
+.cyber-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(18, 34, 42, 0.9);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(44, 76, 70, 0.4);
+}
+
+.cyber-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1aa37a, #43e2b0);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(67, 226, 176, 0.4);
+  transition: width 0.4s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky Sub-Navigation
+   -------------------------------------------------------------------------- */
+.cyber-sticky-nav {
+  position: sticky;
+  top: 56px;
+  z-index: 25;
+  background: rgba(6, 12, 17, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(44, 76, 70, 0.4);
+  border-radius: 14px;
+  padding: 8px 12px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-sticky-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px;
+}
+
+.cyber-sticky-links::-webkit-scrollbar {
+  display: none;
+}
+
+.cyber-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9cb8b1;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  text-decoration: none;
+}
+
+.cyber-nav-btn:hover {
+  color: #e5f5f1;
+  background: rgba(23, 44, 52, 0.6);
+  border-color: rgba(67, 226, 176, 0.2);
+}
+
+.cyber-nav-btn.active {
+  color: #43e2b0;
+  background: rgba(67, 226, 176, 0.12);
+  border-color: rgba(67, 226, 176, 0.4);
+  box-shadow: 0 0 12px rgba(67, 226, 176, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   Search & Filter Strip
+   -------------------------------------------------------------------------- */
+.cyber-search-filter-block {
+  background: rgba(9, 18, 24, 0.88);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cyber-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cyber-search-input-wrap svg {
+  position: absolute;
+  left: 16px;
+  color: #60887e;
+  pointer-events: none;
+}
+
+.cyber-search-input {
+  width: 100%;
+  padding: 12px 18px 12px 46px;
+  background: rgba(14, 28, 36, 0.9);
+  border: 1px solid rgba(44, 76, 70, 0.6);
+  color: #ecf7f4;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.cyber-search-input:focus {
+  border-color: #43e2b0;
+  box-shadow: 0 0 0 2px rgba(67, 226, 176, 0.2);
+  background: rgba(17, 34, 44, 0.98);
+}
+
+.cyber-filter-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cyber-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cyber-filter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #799d94;
+  letter-spacing: 0.06em;
+  min-width: 75px;
+}
+
+.cyber-filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cyber-pill {
+  padding: 5px 12px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9cb8b1;
+  background: rgba(16, 32, 40, 0.7);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.cyber-pill:hover {
+  color: #ebf6f3;
+  border-color: rgba(67, 226, 176, 0.35);
+  background: rgba(22, 44, 54, 0.85);
+}
+
+.cyber-pill.active {
+  color: #43e2b0;
+  border-color: #43e2b0;
+  background: rgba(67, 226, 176, 0.12);
+  box-shadow: 0 0 10px rgba(67, 226, 176, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   Section Common Heading
+   -------------------------------------------------------------------------- */
+.cyber-section {
+  margin-bottom: 52px;
+  scroll-margin-top: 120px;
+}
+
+.cyber-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 22px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(44, 76, 70, 0.3);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cyber-section-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cyber-section-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #43e2b0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cyber-section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ebf6f3;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cyber-section-desc {
+  font-size: 14px;
+  color: #8daea5;
+  margin: 0;
+  max-width: 720px;
+}
+
+/* --------------------------------------------------------------------------
+   Grids
+   -------------------------------------------------------------------------- */
+.cyber-card-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 22px;
+}
+
+.cyber-card-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 22px;
+}
+
+/* --------------------------------------------------------------------------
+   Course / Learning Path Cards
+   -------------------------------------------------------------------------- */
+.cyber-path-card {
+  background: rgba(11, 22, 29, 0.88);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+  transition: all 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-path-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(67, 226, 176, 0.55);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 18px rgba(67, 226, 176, 0.12);
+}
+
+.cyber-path-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cyber-diff-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cyber-diff-badge.beginner {
+  background: rgba(67, 226, 176, 0.12);
+  border: 1px solid rgba(67, 226, 176, 0.35);
+  color: #43e2b0;
+}
+
+.cyber-diff-badge.intermediate {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+}
+
+.cyber-diff-badge.advanced {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+}
+
+.cyber-domain-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #5d7e76;
+}
+
+.cyber-path-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #ebf6f3;
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.cyber-path-desc {
+  font-size: 13px;
+  color: #8daea5;
+  line-height: 1.55;
+  margin: 0 0 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 40px;
+}
+
+.cyber-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(16, 30, 39, 0.65);
+  border: 1px solid rgba(44, 76, 70, 0.35);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.cyber-stat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cyber-stat-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ebf6f3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cyber-stat-lbl {
+  font-size: 10px;
+  color: #7d9e96;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+}
+
+.cyber-action-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(67, 226, 176, 0.4);
+  background: linear-gradient(135deg, rgba(67, 226, 176, 0.16) 0%, rgba(26, 163, 122, 0.28) 100%);
+  color: #ebf6f3;
+}
+
+.cyber-action-btn:hover {
+  background: linear-gradient(135deg, rgba(67, 226, 176, 0.3) 0%, rgba(26, 163, 122, 0.45) 100%);
+  border-color: #43e2b0;
+  box-shadow: 0 4px 18px rgba(67, 226, 176, 0.22);
+}
+
+.cyber-action-btn.secondary {
+  background: rgba(18, 36, 46, 0.7);
+  border-color: rgba(44, 76, 70, 0.5);
+  color: #9cb8b1;
+}
+
+.cyber-action-btn.secondary:hover {
+  background: rgba(26, 50, 62, 0.9);
+  color: #ebf6f3;
+  border-color: rgba(67, 226, 176, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Experiments Cards
+   -------------------------------------------------------------------------- */
+.cyber-exp-card {
+  background: rgba(11, 23, 30, 0.9);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.cyber-exp-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(67, 226, 176, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-card-type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #43e2b0;
+  text-transform: uppercase;
+}
+
+.cyber-exp-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ebf6f3;
+  margin: 8px 0 6px;
+}
+
+.cyber-exp-desc {
+  font-size: 13px;
+  color: #8daea5;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.cyber-exp-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.cyber-feature-tag {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  background: rgba(18, 36, 46, 0.7);
+  border: 1px solid rgba(44, 76, 70, 0.4);
+  color: #9cb8b1;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Missions Cards
+   -------------------------------------------------------------------------- */
+.cyber-mission-card {
+  background: linear-gradient(135deg, rgba(12, 24, 32, 0.92) 0%, rgba(8, 17, 22, 0.95) 100%);
+  border: 1px solid rgba(44, 76, 70, 0.5);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
+  transition: all 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-mission-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(67, 226, 176, 0.6);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.cyber-mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cyber-xp-reward-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #43e2b0;
+  background: rgba(67, 226, 176, 0.12);
+  border: 1px solid rgba(67, 226, 176, 0.3);
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cyber-mission-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #ebf6f3;
+  margin: 0 0 8px;
+}
+
+.cyber-scenario-box {
+  background: rgba(16, 32, 42, 0.65);
+  border: 1px solid rgba(44, 76, 70, 0.4);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  color: #a4c4bd;
+  line-height: 1.5;
+}
+
+.cyber-objectives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.cyber-obj-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #8daea5;
+}
+
+.cyber-obj-checkbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid #43e2b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(67, 226, 176, 0.1);
+  color: #43e2b0;
+}
+
+/* --------------------------------------------------------------------------
+   SOC & Threat Intel Panels
+   -------------------------------------------------------------------------- */
+.cyber-intel-panel {
+  background: rgba(10, 20, 27, 0.92);
+  border: 1px solid rgba(44, 76, 70, 0.5);
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.cyber-log-terminal {
+  background: #04090d;
+  border: 1px solid rgba(44, 76, 70, 0.5);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: #9cb8b1;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.cyber-log-line.alert {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.cyber-log-line.warn {
+  color: #fbbf24;
+}
+
+.cyber-log-line.ok {
+  color: #43e2b0;
+}
+
+.cyber-ioc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cyber-ioc-card {
+  background: rgba(15, 30, 39, 0.7);
+  border: 1px solid rgba(44, 76, 70, 0.4);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.cyber-ioc-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #6d938b;
+  text-transform: uppercase;
+}
+
+.cyber-ioc-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: #ebf6f3;
+  word-break: break-all;
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Daily Challenge & Knowledge Check
+   -------------------------------------------------------------------------- */
+.cyber-quiz-card {
+  background: linear-gradient(135deg, rgba(11, 23, 31, 0.95) 0%, rgba(7, 15, 20, 0.98) 100%);
+  border: 1px solid rgba(67, 226, 176, 0.3);
+  border-radius: 18px;
+  padding: 26px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-quiz-question {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ebf6f3;
+  margin: 12px 0 18px;
+  line-height: 1.45;
+}
+
+.cyber-quiz-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.cyber-quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(16, 32, 42, 0.7);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 10px;
+  font-size: 14px;
+  color: #9cb8b1;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.cyber-quiz-option:hover {
+  background: rgba(22, 44, 56, 0.85);
+  color: #ebf6f3;
+  border-color: rgba(67, 226, 176, 0.35);
+}
+
+.cyber-quiz-option.selected {
+  background: rgba(67, 226, 176, 0.12);
+  border-color: #43e2b0;
+  color: #43e2b0;
+}
+
+.cyber-quiz-option.correct {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: #22c55e;
+  color: #4ade80;
+}
+
+.cyber-quiz-option.wrong {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+.cyber-option-key {
+  font-family: 'DM Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cyber-feedback-box {
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.cyber-feedback-box.correct {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
+}
+
+.cyber-feedback-box.wrong {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+/* --------------------------------------------------------------------------
+   Skill Tree Progression
+   -------------------------------------------------------------------------- */
+.cyber-skill-tree-box {
+  background: rgba(9, 19, 25, 0.92);
+  border: 1px solid rgba(44, 76, 70, 0.45);
+  border-radius: 18px;
+  padding: 26px;
+  margin-bottom: 32px;
+}
+
+.cyber-tree-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  margin-top: 16px;
+}
+
+.cyber-tree-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.cyber-tree-node {
+  background: rgba(15, 30, 39, 0.85);
+  border: 1px solid rgba(44, 76, 70, 0.5);
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 170px;
+  text-align: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.cyber-tree-node.mastered {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.15);
+}
+
+.cyber-tree-node.in-progress {
+  border-color: #43e2b0;
+  background: rgba(67, 226, 176, 0.1);
+  box-shadow: 0 0 16px rgba(67, 226, 176, 0.2);
+}
+
+.cyber-tree-node.locked {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.cyber-tree-node-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ebf6f3;
+  margin-bottom: 4px;
+}
+
+.cyber-tree-node-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #799d94;
+}
+
+/* --------------------------------------------------------------------------
+   Achievements Grid
+   -------------------------------------------------------------------------- */
+.cyber-achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.cyber-achieve-card {
+  background: rgba(13, 26, 34, 0.85);
+  border: 1px solid rgba(44, 76, 70, 0.4);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.cyber-achieve-card.unlocked {
+  border-color: rgba(67, 226, 176, 0.4);
+  background: rgba(67, 226, 176, 0.06);
+}
+
+.cyber-achieve-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(18, 38, 48, 0.7);
+  border: 1px solid rgba(44, 76, 70, 0.5);
+  flex-shrink: 0;
+}
+
+.cyber-achieve-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ebf6f3;
+  margin: 0 0 2px;
+}
+
+.cyber-achieve-desc {
+  font-size: 11.5px;
+  color: #8daea5;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Experiment / Lab Modal Overlay
+   -------------------------------------------------------------------------- */
+.cyber-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 10, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cyber-modal-container {
+  width: min(840px, 100%);
+  max-height: 90vh;
+  background: #091319;
+  border: 1px solid rgba(67, 226, 176, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(67, 226, 176, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cyber-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(44, 76, 70, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(12, 24, 32, 0.8);
+}
+
+.cyber-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cyber-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(44, 76, 70, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  background: rgba(12, 24, 32, 0.8);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Media Queries
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .cyber-card-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cyber-card-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .cyber-academy-wrap {
+    width: calc(100% - 32px);
+    padding: 20px 0 60px;
+  }
+  .cyber-main-title {
+    font-size: 32px;
+  }
+  .cyber-card-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .cyber-sticky-nav {
+    top: 50px;
+    padding: 6px 8px;
+  }
+  .cyber-search-filter-block {
+    padding: 16px;
+  }
+  .cyber-dashboard-banner {
+    padding: 18px 20px;
+  }
+}
+
+@media (max-width: 390px) {
+  .cyber-academy-wrap {
+    width: calc(100% - 20px);
+    padding: 16px 0 50px;
+  }
+  .cyber-main-title {
+    font-size: 28px;
+  }
+  .cyber-path-card {
+    padding: 18px;
+  }
+}

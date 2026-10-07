@@ -34,6 +34,13 @@ app.use(cookieParser());
 
 app.use("/api", router);
 app.use(((error, req, res, _next) => {
+  if (error instanceof SyntaxError && "status" in error && (error as any).status === 400) {
+    res.status(400).json({
+      success: false,
+      error: { code: "INVALID_JSON", message: "Malformed JSON payload in request." },
+    });
+    return;
+  }
   req.log.error({ err: error }, "Unhandled API error");
   res.status(500).json({
     success: false,

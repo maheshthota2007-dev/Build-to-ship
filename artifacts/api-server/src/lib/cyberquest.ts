@@ -71,7 +71,7 @@ export function publicUser(user: {
     xp: user.xp,
     level: levelForXp(user.xp).level,
     streak: user.streak,
-    createdAt: user.createdAt.toISOString(),
+    createdAt: (typeof user.createdAt === "string" ? new Date(user.createdAt) : user.createdAt).toISOString(),
   };
 }
 
@@ -370,7 +370,7 @@ export function toPublicMission(
     xpReward: mission.xpReward,
     scenario: mission.scenario,
     completed,
-    createdAt: mission.createdAt.toISOString(),
+    createdAt: (typeof mission.createdAt === "string" ? new Date(mission.createdAt) : mission.createdAt).toISOString(),
   };
 }
 

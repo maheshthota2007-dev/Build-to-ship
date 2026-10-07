@@ -88,7 +88,7 @@ router.get("/progress", requireAuth, async (req, res): Promise<void> => {
           category: attempt.category,
           score: attempt.score,
           xpAwarded: attempt.xpAwarded,
-          createdAt: attempt.createdAt.toISOString(),
+          createdAt: (typeof attempt.createdAt === "string" ? new Date(attempt.createdAt) : attempt.createdAt).toISOString(),
         })),
         recommendation: weakest
           ? `Your lowest recent score is ${weakest.category} (${weakest.score}%). Try another mission in this area.`
