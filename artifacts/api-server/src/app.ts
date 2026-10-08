@@ -1,14 +1,10 @@
-import express, { type Express } from "express";
+import express, { type Express, type ErrorRequestHandler } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import _pinoHttp, { type Options } from "pino-http";
-import type { ErrorRequestHandler } from "express";
+import pinoHttp from "pino-http";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import router from "./routes";
 import { logger } from "./lib/logger";
-
-const pinoHttp = ((typeof _pinoHttp === "function"
-  ? _pinoHttp
-  : (_pinoHttp as any)?.default || (_pinoHttp as any)?.pinoHttp) ?? _pinoHttp) as (opts?: Options) => any;
 
 const app: Express = express();
 
@@ -16,14 +12,14 @@ app.use(
   pinoHttp({
     logger,
     serializers: {
-      req(req: any) {
+      req(req: IncomingMessage & { id?: unknown }) {
         return {
           id: req.id,
           method: req.method,
           url: req.url?.split("?")[0],
         };
       },
-      res(res: any) {
+      res(res: ServerResponse) {
         return {
           statusCode: res.statusCode,
         };
@@ -38,7 +34,7 @@ app.use(cookieParser());
 
 app.use("/api", router);
 app.use(((error, req, res, _next) => {
-  if (error instanceof SyntaxError && "status" in error && (error as any).status === 400) {
+  if (error instanceof SyntaxError && "status" in error && (error as { status?: number }).status === 400) {
     res.status(400).json({
       success: false,
       error: { code: "INVALID_JSON", message: "Malformed JSON payload in request." },
