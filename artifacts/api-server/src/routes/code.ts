@@ -137,13 +137,13 @@ router.post("/code/run", optionalAuth, (async (req: Request, res: Response) => {
 
     const startTime = Date.now();
     try {
-      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+      const response: any = await fetch("https://emkc.org/api/v2/piston/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pistonReq),
       });
 
-      if (response.ok) {
+      if (response && response.ok) {
         const data: any = await response.json();
         const executionTime = Date.now() - startTime;
 
