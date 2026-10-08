@@ -1,10 +1,14 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import pinoHttp from "pino-http";
+import _pinoHttp, { type Options } from "pino-http";
 import type { ErrorRequestHandler } from "express";
 import router from "./routes";
 import { logger } from "./lib/logger";
+
+const pinoHttp = ((typeof _pinoHttp === "function"
+  ? _pinoHttp
+  : (_pinoHttp as any)?.default || (_pinoHttp as any)?.pinoHttp) ?? _pinoHttp) as (opts?: Options) => any;
 
 const app: Express = express();
 
@@ -12,14 +16,14 @@ app.use(
   pinoHttp({
     logger,
     serializers: {
-      req(req) {
+      req(req: any) {
         return {
           id: req.id,
           method: req.method,
           url: req.url?.split("?")[0],
         };
       },
-      res(res) {
+      res(res: any) {
         return {
           statusCode: res.statusCode,
         };
