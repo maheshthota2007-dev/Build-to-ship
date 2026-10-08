@@ -70,8 +70,30 @@ export function Shell({children}: {children:ReactNode}) {
   const [mobile,setMobile]=useState(false);
   const [loc,setLoc]=useLocation();
   const auth=useGetCurrentUser({query:{queryKey:getGetCurrentUserQueryKey(),enabled:hasSessionHint()}});
-  const logout=useLogout();
+  const logout=useLogout({
+    request: {
+      credentials: 'include',
+    },
+  });
   const user=auth.data?.data?.user;
+
+  const handleLogout = () => {
+    if (logout.isPending) return;
+    const finalizeLogout = () => {
+      window.localStorage.removeItem(SESSION_HINT);
+      qc.clear();
+      setLoc('/login');
+    };
+    try {
+      logout.mutate(undefined, {
+        onSuccess: finalizeLogout,
+        onError: finalizeLogout,
+        onSettled: finalizeLogout,
+      });
+    } catch {
+      finalizeLogout();
+    }
+  };
   const mainLinks=[
     ['/dashboard','Dashboard', <LayoutDashboard size={16}/>],
     ['/events','Cyber Events', <Calendar size={16}/>],
@@ -132,7 +154,14 @@ export function Shell({children}: {children:ReactNode}) {
             </div>
             <div className="profile-actions">
               <Link href="/profile" className="profile-link">View Profile</Link>
-              <button className="profile-logout" onClick={()=>logout.mutate(undefined,{onSuccess:()=>{window.localStorage.removeItem(SESSION_HINT);qc.setQueryData(getGetCurrentUserQueryKey(),undefined);setLoc('/');}})}>Sign Out &rarr;</button>
+              <button
+                className="profile-logout"
+                onClick={handleLogout}
+                disabled={logout.isPending}
+                data-testid="button-sign-out"
+              >
+                {logout.isPending ? 'Signing out…' : 'Sign Out \u2192'}
+              </button>
             </div>
           </div>
         ) : (
@@ -203,8 +232,19 @@ export function Shell({children}: {children:ReactNode}) {
 }
 export function NeedAuth({children,admin=false}:{children:ReactNode;admin?:boolean}) {
   const [loc,setLoc]=useLocation();
-  const q=useGetCurrentUser({query:{queryKey:getGetCurrentUserQueryKey(),enabled:hasSessionHint()}});
-  useEffect(()=>{if(!q.isLoading&&!q.data?.data?.user){if(q.isError)window.localStorage.removeItem(SESSION_HINT);setLoc('/login');}},[q.isLoading,q.data,q.isError,setLoc]);
+  const hasHint = hasSessionHint();
+  const q=useGetCurrentUser({query:{queryKey:getGetCurrentUserQueryKey(),enabled:hasHint}});
+
+  useEffect(()=>{
+    if (!hasHint || (!q.isLoading && !q.data?.data?.user)) {
+      if (q.isError || !hasHint) {
+        window.localStorage.removeItem(SESSION_HINT);
+      }
+      setLoc('/login');
+    }
+  }, [hasHint, q.isLoading, q.data, q.isError, setLoc]);
+
+  if (!hasHint) return null;
   if(q.isLoading)return <Shell><Loading/></Shell>;
   const user=q.data?.data?.user;
   if(!user)return null;
@@ -961,21 +1001,24 @@ function Router(){return <RoutedErrorBoundary><Switch>
   <Route path="/" component={Home}/><Route path="/login"><AuthPage register={false}/></Route><Route path="/register"><AuthPage register/></Route>
   <Route path="/dashboard"><NeedAuth><Dashboard/></NeedAuth></Route>
   <Route path="/missions/:id"><NeedAuth><MissionPage/></NeedAuth></Route>
-  <Route path="/leaderboard" component={Leaderboard}/><Route path="/profile"><NeedAuth><Profile/></NeedAuth></Route><Route path="/mentor" component={Mentor}/><Route path="/admin" component={Admin}/>
-  <Route path="/events" component={CyberEventsPage} />
-  <Route path="/courses/:courseId/lessons/:lessonId" component={LessonView} />
-  <Route path="/learn/:courseId/lessons/:lessonId" component={LessonView} />
-  <Route path="/learn/:courseId/lesson/:lessonId" component={LessonView} />
-  <Route path="/lessons/:lessonId" component={LessonView} />
-  <Route path="/learn" component={LearningAcademy} />
-  <Route path="/cybersecurity" component={CybersecurityAcademy} />
-  <Route path="/programming" component={ProgrammingAcademy} />
-  <Route path="/lab" component={CodingLab} />
-  <Route path="/projects" component={ProjectHub} />
-  <Route path="/challenges" component={Challenges} />
-  <Route path="/progress" component={ProgressDashboard} />
-  <Route path="/certificates" component={Certificates} />
-  <Route path="/interview" component={InterviewPrep} />
+  <Route path="/leaderboard" component={Leaderboard}/>
+  <Route path="/profile"><NeedAuth><Profile/></NeedAuth></Route>
+  <Route path="/mentor"><NeedAuth><Mentor/></NeedAuth></Route>
+  <Route path="/admin"><NeedAuth admin><Admin/></NeedAuth></Route>
+  <Route path="/events"><NeedAuth><CyberEventsPage/></NeedAuth></Route>
+  <Route path="/courses/:courseId/lessons/:lessonId"><NeedAuth><LessonView/></NeedAuth></Route>
+  <Route path="/learn/:courseId/lessons/:lessonId"><NeedAuth><LessonView/></NeedAuth></Route>
+  <Route path="/learn/:courseId/lesson/:lessonId"><NeedAuth><LessonView/></NeedAuth></Route>
+  <Route path="/lessons/:lessonId"><NeedAuth><LessonView/></NeedAuth></Route>
+  <Route path="/learn"><NeedAuth><LearningAcademy/></NeedAuth></Route>
+  <Route path="/cybersecurity"><NeedAuth><CybersecurityAcademy/></NeedAuth></Route>
+  <Route path="/programming"><NeedAuth><ProgrammingAcademy/></NeedAuth></Route>
+  <Route path="/lab"><NeedAuth><CodingLab/></NeedAuth></Route>
+  <Route path="/projects"><NeedAuth><ProjectHub/></NeedAuth></Route>
+  <Route path="/challenges"><NeedAuth><Challenges/></NeedAuth></Route>
+  <Route path="/progress"><NeedAuth><ProgressDashboard/></NeedAuth></Route>
+  <Route path="/certificates"><NeedAuth><Certificates/></NeedAuth></Route>
+  <Route path="/interview"><NeedAuth><InterviewPrep/></NeedAuth></Route>
   <Route component={NotFound}/>
 </Switch></RoutedErrorBoundary>}
 function App(){return <QueryClientProvider client={qc}><TooltipProvider><Router/><Toaster/></TooltipProvider></QueryClientProvider>}

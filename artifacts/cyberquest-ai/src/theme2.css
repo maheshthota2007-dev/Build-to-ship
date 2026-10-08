@@ -90,6 +90,11 @@
   color: #ff6b87;
   text-shadow: 0 0 8px rgba(226, 67, 97, 0.4);
 }
+.profile-logout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 /* Admin / User Indicator Pills */
 .admin-indicator {

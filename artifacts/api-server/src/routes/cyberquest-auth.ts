@@ -6,6 +6,7 @@ import {
   GetMyProfileResponse,
   LoginBody,
   LoginResponse,
+  LogoutResponse,
   RegisterBody,
   RegisterResponse,
   UpdateMyProfileBody,
@@ -117,13 +118,19 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 });
 
 router.post("/auth/logout", (_req, res): void => {
-  res.clearCookie(SESSION_COOKIE, {
+  const cookieOpts = {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
+  };
+  res.clearCookie(SESSION_COOKIE, cookieOpts);
+  res.cookie(SESSION_COOKIE, "", {
+    ...cookieOpts,
+    maxAge: 0,
+    expires: new Date(0),
   });
-  res.json({ success: true, data: {} });
+  res.json(LogoutResponse.parse({ success: true, data: {} }));
 });
 
 router.get("/auth/me", requireAuth, async (req, res): Promise<void> => {
